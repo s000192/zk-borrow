@@ -3,6 +3,8 @@
 pragma solidity ^0.5.16;
 
 import "./JToken.sol";
+import "./Interface/IHasher.sol";
+import "./Interface/IVerifier.sol";
 
 /**
  * @title Compound's JErc20 Contract
@@ -29,10 +31,11 @@ contract JErc20 is JToken, JErc20Interface, JProtocolSeizeShareStorage {
         string memory symbol_,
         uint8 decimals_,
         uint32 levels_,
-        IHasher hasher_
+        IHasher hasher_,
+        IVerifier verifier_
     ) public {
         // JToken initialize does the bulk of the work
-        super.initialize(joetroller_, interestRateModel_, initialExchangeRateMantissa_, name_, symbol_, decimals_, levels_, hasher_);
+        super.initialize(joetroller_, interestRateModel_, initialExchangeRateMantissa_, name_, symbol_, decimals_, levels_, hasher_, verifier_);
 
         // Set underlying and sanity check it
         underlying = underlying_;

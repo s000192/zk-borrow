@@ -5,7 +5,9 @@ pragma solidity ^0.5.16;
 import "./JToken.sol";
 import "./ERC3156FlashLenderInterface.sol";
 import "./ERC3156FlashBorrowerInterface.sol";
-
+import "./Interface/IHasher.sol";
+import "./Interface/IVerifier.sol";
+import "hardhat/console.sol";
 /**
  * @title Cream's JCollateralCapErc20 Contract
  * @notice JTokens which wrap an EIP-20 underlying with collateral cap
@@ -31,10 +33,11 @@ contract JCollateralCapErc20 is JToken, JCollateralCapErc20Interface, JProtocolS
         string memory symbol_,
         uint8 decimals_,
         uint32 levels_,
-        IHasher hasher_
+        IHasher hasher_,
+        IVerifier verifier_
     ) public {
         // JToken initialize does the bulk of the work
-        super.initialize(joetroller_, interestRateModel_, initialExchangeRateMantissa_, name_, symbol_, decimals_, levels_, hasher_);
+        super.initialize(joetroller_, interestRateModel_, initialExchangeRateMantissa_, name_, symbol_, decimals_, levels_, hasher_, verifier_);
 
         // Set underlying and sanity check it
         underlying = underlying_;
@@ -421,22 +424,19 @@ contract JCollateralCapErc20 is JToken, JCollateralCapErc20Interface, JProtocolS
         initializeAccountCollateralTokens(src);
         initializeAccountCollateralTokens(dst);
 
-        /**
-         * For every user, accountTokens must be greater than or equal to accountCollateralTokens.
-         * The buffer between the two values will be transferred first.
-         * bufferTokens = accountTokens[src] - accountCollateralTokens[src]
-         * collateralTokens = tokens - bufferTokens
-         */
+        
+        // For every user, accountTokens must be greater than or equal to accountCollateralTokens.
+        // The buffer between the two values will be transferred first.
+        // bufferTokens = accountTokens[src] - accountCollateralTokens[src]
+        // collateralTokens = tokens - bufferTokens
         uint256 bufferTokens = sub_(accountTokens[src], accountCollateralTokens[src]);
         uint256 collateralTokens = 0;
         if (tokens > bufferTokens) {
             collateralTokens = tokens - bufferTokens;
         }
 
-        /**
-         * Since bufferTokens are not collateralized and can be transferred freely, we only check with joetroller
-         * whether collateralized tokens can be transferred.
-         */
+        // Since bufferTokens are not collateralized and can be transferred freely, we only check with joetroller
+        // whether collateralized tokens can be transferred.
         uint256 allowed = joetroller.transferAllowed(address(this), src, dst, collateralTokens);
         if (allowed != 0) {
             return failOpaque(Error.JOETROLLER_REJECTION, FailureInfo.TRANSFER_JOETROLLER_REJECTION, allowed);
@@ -689,12 +689,10 @@ contract JCollateralCapErc20 is JToken, JCollateralCapErc20Interface, JProtocolS
         }
 
 
-        /**
-         * For every user, accountTokens must be greater than or equal to accountCollateralTokens.
-         * The buffer between the two values will be redeemed first.
-         * bufferTokens = accountTokens[redeemer] - accountCollateralTokens[redeemer]
-         * collateralTokens = redeemTokens - bufferTokens
-         */
+        // For every user, accountTokens must be greater than or equal to accountCollateralTokens.
+        // The buffer between the two values will be redeemed first.
+        // bufferTokens = accountTokens[redeemer] - accountCollateralTokens[redeemer]
+        // collateralTokens = redeemTokens - bufferTokens
         uint256 bufferTokens = sub_(accountTokens[redeemer], accountCollateralTokens[redeemer]);
         uint256 collateralTokens = 0;
         if (vars.redeemTokens > bufferTokens) {

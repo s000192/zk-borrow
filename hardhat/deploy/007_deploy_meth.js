@@ -32,6 +32,7 @@ module.exports = async function ({
 
   const jAvaxDelegate = await ethers.getContract("JAvaxDelegate");
   const hasher = await ethers.getContract("Hasher");
+  const verifier = await ethers.getContract("Verifier");
 
   const deployment = await deploy("JAvaxDelegator", {
     from: deployer,
@@ -47,7 +48,8 @@ module.exports = async function ({
       jAvaxDelegate.address,
       "0x",
       20,
-      hasher.address
+      hasher.address,
+      verifier.address
     ],
     log: true,
     deterministicDeployment: false,

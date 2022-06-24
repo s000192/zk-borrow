@@ -4,6 +4,7 @@ pragma solidity ^0.5.16;
 
 import "./JTokenInterfaces.sol";
 import "./Interface/IHasher.sol";
+import "./Interface/IVerifier.sol";
 
 /**
  * @title Compound's JErc20Delegator Contract
@@ -36,7 +37,8 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
         address implementation_,
         bytes memory becomeImplementationData,
         uint32 levels_,
-        IHasher hasher_
+        IHasher hasher_,
+        IVerifier verifier_
     ) public {
         // Creator of the contract is admin during initialization
         admin = msg.sender;
@@ -45,7 +47,7 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
         delegateTo(
             implementation_,
             abi.encodeWithSignature(
-                "initialize(address,address,address,uint256,string,string,uint8,uint32,address)",
+                "initialize(address,address,address,uint256,string,string,uint8,uint32,address,address)",
                 underlying_,
                 joetroller_,
                 interestRateModel_,
@@ -54,7 +56,8 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
                 symbol_,
                 decimals_,
                 levels_,
-                hasher_
+                hasher_,
+                verifier_
             )
         );
 

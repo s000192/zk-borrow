@@ -31,6 +31,7 @@ module.exports = async function ({
   });
   const jUsdcDelegate = await ethers.getContract("JUsdcDelegate");
   const hasher = await ethers.getContract("Hasher");
+  const verifier = await ethers.getContract("Verifier");
 
   let usdcAddress = USDC.get(chainId);
 
@@ -67,7 +68,8 @@ module.exports = async function ({
       jUsdcDelegate.address,
       "0x",
       20,
-      hasher.address
+      hasher.address,
+      verifier.address
     ],
     log: true,
     deterministicDeployment: false,

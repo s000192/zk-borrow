@@ -12,13 +12,14 @@ import "./InterestRateModel.sol";
 import "./MerkleTreeWithHistory.sol";
 import "./Verifier.sol";
 import "./Interface/IHasher.sol";
-import "hardhat/console.sol";
+import "./Interface/IVerifier.sol";
+
 /**
  * @title Compound's JToken Contract
  * @notice Abstract base for JTokens
  * @author Compound
  */
-contract JToken is JTokenInterface, Verifier, Exponential, TokenErrorReporter {
+contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
     /**
      * @notice Initialize the money market
      * @param joetroller_ The address of the Joetroller
@@ -36,7 +37,8 @@ contract JToken is JTokenInterface, Verifier, Exponential, TokenErrorReporter {
         string memory symbol_,
         uint8 decimals_,
         uint32 levels_,
-        IHasher hasher_
+        IHasher hasher_,
+        IVerifier verifier_
     ) public {
         require(msg.sender == admin, "only admin may initialize the market");
         require(accrualBlockTimestamp == 0 && borrowIndex == 0, "market may only be initialized once");
@@ -60,6 +62,7 @@ contract JToken is JTokenInterface, Verifier, Exponential, TokenErrorReporter {
         name = name_;
         symbol = symbol_;
         decimals = decimals_;
+        verifier = verifier_;
 
         initializeTree(levels_, hasher_);
 

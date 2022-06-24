@@ -4,7 +4,8 @@ pragma solidity ^0.5.16;
 
 import "./JTokenInterfaces.sol";
 import "./Interface/IHasher.sol";
-import "hardhat/console.sol";
+import "./Interface/IVerifier.sol";
+
 /**
  * @title Compound's JWrappedNativeDelegator Contract
  * @notice JTokens which wrap an EIP-20 underlying and delegate to an implementation
@@ -36,7 +37,8 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
         address implementation_,
         bytes memory becomeImplementationData,
         uint32 levels_,
-        IHasher hasher_
+        IHasher hasher_,
+        IVerifier verifier_
     ) public {
         // Creator of the contract is admin during initialization
         admin = msg.sender;
@@ -44,7 +46,7 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
         delegateTo(
             implementation_,
             abi.encodeWithSignature(
-                "initialize(address,address,address,uint256,string,string,uint8,uint32,address)",
+                "initialize(address,address,address,uint256,string,string,uint8,uint32,address,address)",
                 underlying_,
                 joetroller_,
                 interestRateModel_,
@@ -53,7 +55,8 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
                 symbol_,
                 decimals_,
                 levels_,
-                hasher_
+                hasher_,
+                verifier_
             )
         );
 

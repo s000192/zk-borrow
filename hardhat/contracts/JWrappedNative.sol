@@ -5,7 +5,8 @@ pragma solidity ^0.5.16;
 import "./JToken.sol";
 import "./ERC3156FlashBorrowerInterface.sol";
 import "./ERC3156FlashLenderInterface.sol";
-import "hardhat/console.sol";
+import "./Interface/IHasher.sol";
+import "./Interface/IVerifier.sol";
 
 /**
  * @title Wrapped native token interface
@@ -41,10 +42,11 @@ contract JWrappedNative is JToken, JWrappedNativeInterface, JProtocolSeizeShareS
         string memory symbol_,
         uint8 decimals_,
         uint32 levels_,
-        IHasher hasher_
+        IHasher hasher_,
+        IVerifier verifier_
     ) public {
         // JToken initialize does the bulk of the work
-        initialize(joetroller_, interestRateModel_, initialExchangeRateMantissa_, name_, symbol_, decimals_, levels_, hasher_);
+        super.initialize(joetroller_, interestRateModel_, initialExchangeRateMantissa_, name_, symbol_, decimals_, levels_, hasher_, verifier_);
         // Set underlying and sanity check it
         underlying = underlying_;
         EIP20Interface(underlying).totalSupply();

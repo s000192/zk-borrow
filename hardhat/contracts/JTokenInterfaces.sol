@@ -6,6 +6,7 @@ import "./JoetrollerInterface.sol";
 import "./InterestRateModel.sol";
 import "./ERC3156FlashBorrowerInterface.sol";
 import "./MerkleTreeWithHistory.sol";
+import "./Interface/IVerifier.sol";
 
 contract JTokenStorage {
     /**
@@ -58,6 +59,11 @@ contract JTokenStorage {
      * @notice Model which tells what the current interest rate should be
      */
     InterestRateModel public interestRateModel;
+
+    /**
+     * @notice Verifier contract
+     */
+    IVerifier public verifier;
 
     /**
      * @notice Initial exchange rate used when minting the first JTokens (used when totalSupply = 0)
