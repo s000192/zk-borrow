@@ -61,6 +61,7 @@ module.exports = async function ({
       joetroller.address,
       interestRateModel.address,
       ethers.utils.parseUnits("2", 14).toString(),
+      ethers.utils.parseUnits("10000", 6).toString(), // default deposit
       "Methane USD coin",
       "mUSDC",
       8,

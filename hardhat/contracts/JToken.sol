@@ -33,6 +33,7 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         JoetrollerInterface joetroller_,
         InterestRateModel interestRateModel_,
         uint256 initialExchangeRateMantissa_,
+        uint256 defaultDeposit_,
         string memory name_,
         string memory symbol_,
         uint8 decimals_,
@@ -59,6 +60,7 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         err = _setInterestRateModelFresh(interestRateModel_);
         require(err == uint256(Error.NO_ERROR), "setting interest rate model failed");
 
+        defaultDeposit = defaultDeposit_;
         name = name_;
         symbol = symbol_;
         decimals = decimals_;
@@ -393,18 +395,17 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
     /**
      * @notice Sender supplies assets into the market and receives jTokens in exchange
      * @dev Accrues interest whether or not the operation succeeds, unless reverted
-     * @param mintAmount The amount of the underlying asset to supply
      * @param isNative The amount is in native or not
      * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
      */
-    function mintInternal(uint256 mintAmount, bool isNative) internal nonReentrant returns (uint256, uint256) {
+    function mintInternal(bool isNative) internal nonReentrant returns (uint256, uint256) {
         uint256 error = accrueInterest();
         if (error != uint256(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
             return (fail(Error(error), FailureInfo.MINT_ACCRUE_INTEREST_FAILED), 0);
         }
         // mintFresh emits the actual Mint event if successful and logs on errors, so we don't need to
-        return mintFresh(msg.sender, mintAmount, isNative);
+        return mintFresh(msg.sender, isNative);
     }
 
     /**
@@ -1170,7 +1171,6 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      */
     function mintFresh(
         address minter,
-        uint256 mintAmount,
         bool isNative
     ) internal returns (uint256, uint256);
 

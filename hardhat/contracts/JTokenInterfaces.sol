@@ -71,6 +71,11 @@ contract JTokenStorage {
     uint256 internal initialExchangeRateMantissa;
 
     /**
+     * @notice Default deposit for the underlying token
+     */
+    uint256 public defaultDeposit;
+
+    /**
      * @notice Fraction of interest currently set aside for reserves
      */
     uint256 public reserveFactorMantissa;
@@ -342,7 +347,7 @@ contract JTokenInterface is JTokenStorage, MerkleTreeWithHistory {
 contract JErc20Interface is JErc20Storage {
     /*** User Interface ***/
 
-    function mint(uint256 mintAmount) external returns (uint256);
+    function mint() external returns (uint256);
 
     function redeem(uint256 redeemTokens) external returns (uint256);
 

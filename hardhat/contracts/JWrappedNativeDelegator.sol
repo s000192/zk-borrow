@@ -5,7 +5,7 @@ pragma solidity ^0.5.16;
 import "./JTokenInterfaces.sol";
 import "./Interface/IHasher.sol";
 import "./Interface/IVerifier.sol";
-
+import "hardhat/console.sol";
 /**
  * @title Compound's JWrappedNativeDelegator Contract
  * @notice JTokens which wrap an EIP-20 underlying and delegate to an implementation
@@ -30,6 +30,7 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
         JoetrollerInterface joetroller_,
         InterestRateModel interestRateModel_,
         uint256 initialExchangeRateMantissa_,
+        uint256 defaultDeposit_,
         string memory name_,
         string memory symbol_,
         uint8 decimals_,
@@ -46,11 +47,12 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
         delegateTo(
             implementation_,
             abi.encodeWithSignature(
-                "initialize(address,address,address,uint256,string,string,uint8,uint32,address,address)",
+                "initialize(address,address,address,uint256,uint256,string,string,uint8,uint32,address,address)",
                 underlying_,
                 joetroller_,
                 interestRateModel_,
                 initialExchangeRateMantissa_,
+                defaultDeposit_,
                 name_,
                 symbol_,
                 decimals_,
@@ -95,11 +97,9 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
     /**
      * @notice Sender supplies assets into the market and receives jTokens in exchange
      * @dev Accrues interest whether or not the operation succeeds, unless reverted
-     * @param mintAmount The amount of the underlying asset to supply
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function mint(uint256 mintAmount) external returns (uint256) {
-        mintAmount; // Shh
+    function mint() external returns (uint256) {
         delegateAndReturn();
     }
 

@@ -96,11 +96,9 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
     /**
      * @notice Sender supplies assets into the market and receives jTokens in exchange
      * @dev Accrues interest whether or not the operation succeeds, unless reverted
-     * @param mintAmount The amount of the underlying asset to supply
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function mint(uint256 mintAmount) external returns (uint256) {
-        mintAmount; // Shh
+    function mint() external returns (uint256) {
         delegateAndReturn();
     }
 

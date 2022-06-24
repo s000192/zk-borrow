@@ -27,6 +27,7 @@ contract JErc20 is JToken, JErc20Interface, JProtocolSeizeShareStorage {
         JoetrollerInterface joetroller_,
         InterestRateModel interestRateModel_,
         uint256 initialExchangeRateMantissa_,
+        uint256 defaultDeposit_,
         string memory name_,
         string memory symbol_,
         uint8 decimals_,
@@ -35,7 +36,7 @@ contract JErc20 is JToken, JErc20Interface, JProtocolSeizeShareStorage {
         IVerifier verifier_
     ) public {
         // JToken initialize does the bulk of the work
-        super.initialize(joetroller_, interestRateModel_, initialExchangeRateMantissa_, name_, symbol_, decimals_, levels_, hasher_, verifier_);
+        super.initialize(joetroller_, interestRateModel_, initialExchangeRateMantissa_, defaultDeposit_, name_, symbol_, decimals_, levels_, hasher_, verifier_);
 
         // Set underlying and sanity check it
         underlying = underlying_;
@@ -47,11 +48,10 @@ contract JErc20 is JToken, JErc20Interface, JProtocolSeizeShareStorage {
     /**
      * @notice Sender supplies assets into the market and receives jTokens in exchange
      * @dev Accrues interest whether or not the operation succeeds, unless reverted
-     * @param mintAmount The amount of the underlying asset to supply
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function mint(uint256 mintAmount) external returns (uint256) {
-        (uint256 err, ) = mintInternal(mintAmount, false);
+    function mint() external returns (uint256) {
+        (uint256 err, ) = mintInternal(false);
         return err;
     }
 
@@ -296,26 +296,24 @@ contract JErc20 is JToken, JErc20Interface, JProtocolSeizeShareStorage {
      * @notice User supplies assets into the market and receives jTokens in exchange
      * @dev Assumes interest has already been accrued up to the current timestamp
      * @param minter The address of the account which is supplying the assets
-     * @param mintAmount The amount of the underlying asset to supply
      * @param isNative The amount is in native or not
      * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
      */
     function mintFresh(
         address minter,
-        uint256 mintAmount,
         bool isNative
     ) internal returns (uint256, uint256) {
         /* Fail if mint not allowed */
-        uint256 allowed = joetroller.mintAllowed(address(this), minter, mintAmount);
+        uint256 allowed = joetroller.mintAllowed(address(this), minter, defaultDeposit);
         if (allowed != 0) {
             return (failOpaque(Error.JOETROLLER_REJECTION, FailureInfo.MINT_JOETROLLER_REJECTION, allowed), 0);
         }
 
         /*
-         * Return if mintAmount is zero.
+         * Return if defaultDeposit is zero.
          * Put behind `mintAllowed` for accuring potential JOE rewards.
          */
-        if (mintAmount == 0) {
+        if (defaultDeposit == 0) {
             return (uint256(Error.NO_ERROR), 0);
         }
 
@@ -340,7 +338,7 @@ contract JErc20 is JToken, JErc20Interface, JProtocolSeizeShareStorage {
          *  in case of a fee. On success, the jToken holds an additional `actualMintAmount`
          *  of cash.
          */
-        vars.actualMintAmount = doTransferIn(minter, mintAmount, isNative);
+        vars.actualMintAmount = doTransferIn(minter, defaultDeposit, isNative);
 
         /*
          * We get the current exchange rate and calculate the number of jTokens to be minted:
