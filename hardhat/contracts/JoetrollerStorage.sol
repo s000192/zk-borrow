@@ -48,6 +48,11 @@ contract JoetrollerV1Storage is UnitrollerAdminStorage {
      */
     mapping(address => JToken[]) public accountAssets;
 
+    /**
+     * @notice Mapping to check if nullifier hash is used already
+     */
+    mapping(bytes32 => bool) public nullifierHashes;
+
     enum Version {
         VANILLA,
         COLLATERALCAP,

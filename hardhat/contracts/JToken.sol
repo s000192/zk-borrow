@@ -393,19 +393,51 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
+     * @notice Sender supplies assets into the market
+     * @param _commitment The note commitment, which is PedersenHash(nullifier + secret)
+     * @param isNative The amount is in native or not
+     * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
+     */
+    function depositInternal(bytes32 _commitment, bool isNative) internal returns (uint256, uint256) {
+        return depositFresh(msg.sender, _commitment, isNative);
+    }
+
+    /**
      * @notice Sender supplies assets into the market and receives jTokens in exchange
      * @dev Accrues interest whether or not the operation succeeds, unless reverted
      * @param isNative The amount is in native or not
      * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
      */
-    function mintInternal(bool isNative) internal nonReentrant returns (uint256, uint256) {
+    function mintInternal(
+        uint[2] memory a,
+        uint[2][2] memory b,
+        uint[2] memory c,
+        bytes32 _root,
+        bytes32 _nullifierHash,
+        address minter,
+        bool isNative
+    ) internal nonReentrant returns (uint256, uint256) {
+        require(isKnownRoot(_root), "Cannot find your merkle root");
+        require(
+            verifier.verifyProof(
+              a,
+              b,
+              c,
+              [uint256(_root), uint256(_nullifierHash)]
+            ),
+            "Invalid proof"
+        );
         uint256 error = accrueInterest();
         if (error != uint256(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
             return (fail(Error(error), FailureInfo.MINT_ACCRUE_INTEREST_FAILED), 0);
         }
         // mintFresh emits the actual Mint event if successful and logs on errors, so we don't need to
-        return mintFresh(msg.sender, isNative);
+        return mintFresh(
+            _nullifierHash,
+            minter,
+            isNative
+        );
     }
 
     /**
@@ -1170,9 +1202,20 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @dev Assumes interest has already been accrued up to the current timestamp
      */
     function mintFresh(
+        bytes32 _nullifierHash,
         address minter,
         bool isNative
     ) internal returns (uint256, uint256);
+
+    /**
+     * @notice User supplies assets into the market and receives jTokens in exchange
+     */
+    function depositFresh(
+        address depositor,
+        bytes32 _commitment,
+        bool isNative
+    ) internal returns (uint256, uint256);
+
 
     /**
      * @notice User redeems jTokens in exchange for the underlying asset

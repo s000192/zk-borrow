@@ -106,6 +106,11 @@ contract JTokenStorage {
     uint256 public totalSupply;
 
     /**
+     * @notice Commitments used boolean mapping
+     */
+    mapping(bytes32 => bool) public commitments;
+
+    /**
      * @notice Official record of token balances for each account
      */
     mapping(address => uint256) internal accountTokens;
@@ -189,9 +194,14 @@ contract JTokenInterface is JTokenStorage, MerkleTreeWithHistory {
     event AccrueInterest(uint256 cashPrior, uint256 interestAccumulated, uint256 borrowIndex, uint256 totalBorrows);
 
     /**
+     * @notice Event emitted when tokens are deposited
+     */
+    event Deposit(bytes32 commitment, uint32 leafIndex, uint256 timestamp);
+
+    /**
      * @notice Event emitted when tokens are minted
      */
-    event Mint(address minter, uint256 mintAmount, uint256 mintTokens);
+    event Mint(address minter, bytes32 nulliferHash, uint256 mintAmount, uint256 mintTokens);
 
     /**
      * @notice Event emitted when tokens are redeemed
@@ -346,8 +356,16 @@ contract JTokenInterface is JTokenStorage, MerkleTreeWithHistory {
 
 contract JErc20Interface is JErc20Storage {
     /*** User Interface ***/
+    function deposit(bytes32 _commitment) external returns(uint256);
 
-    function mint() external returns (uint256);
+    function mint(
+        uint[2] calldata a,
+        uint[2][2] calldata b,
+        uint[2] calldata c,
+        bytes32 _root,
+        bytes32 _nullifierHash,
+        address _recipient
+    ) external returns (uint256);
 
     function redeem(uint256 redeemTokens) external returns (uint256);
 
@@ -382,8 +400,16 @@ contract JWrappedNativeInterface is JErc20Interface {
     event Flashloan(address indexed receiver, uint256 amount, uint256 totalFee, uint256 reservesFee);
 
     /*** User Interface ***/
+    function depositNative(bytes32 _commitment) payable external returns (uint256);
 
-    function mintNative() external payable returns (uint256);
+    function mintNative(
+        uint[2] calldata a,
+        uint[2][2] calldata b,
+        uint[2] calldata c,
+        bytes32 _root,
+        bytes32 _nullifierHash,
+        address minter
+    ) external payable returns (uint256);
 
     function redeemNative(uint256 redeemTokens) external returns (uint256);
 

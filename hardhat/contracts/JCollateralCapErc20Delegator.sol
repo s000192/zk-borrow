@@ -96,11 +96,39 @@ contract JCollateralCapErc20Delegator is JTokenInterface, JCollateralCapErc20Int
     }
 
     /**
-     * @notice Sender supplies assets into the market and receives jTokens in exchange
-     * @dev Accrues interest whether or not the operation succeeds, unless reverted
+     * @notice Sender supplies assets into the market
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function mint() external returns (uint256) {
+    function deposit(bytes32 _commitment) external returns (uint256) {
+        _commitment; // Shh
+        delegateAndReturn();
+    }
+
+    /**
+     * @notice Receives jTokens in exchange
+     * @dev Accrues interest whether or not the operation succeeds, unless reverted
+     * @param a Part of zk proof
+     * @param b Part of zk proof
+     * @param c Part of zk proof
+     * @param _root The merkle root of all deposits in the contract
+     * @param _nullifierHash The hash of unique deposit nullifier to prevent double spends
+     * @param minter The recipient address
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
+    function mint(
+        uint[2] calldata a,
+        uint[2][2] calldata b,
+        uint[2] calldata c,
+        bytes32 _root,
+        bytes32 _nullifierHash,
+        address minter
+    ) external returns (uint256) {
+        a;
+        b;
+        c;
+        _root;
+        _nullifierHash;
+        minter;
         delegateAndReturn();
     }
 

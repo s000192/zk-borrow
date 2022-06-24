@@ -50,8 +50,23 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
      * @dev Accrues interest whether or not the operation succeeds, unless reverted
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function mint() external returns (uint256) {
-        (uint256 err, ) = mintInternal(false);
+    function mint(
+        uint[2] calldata a,
+        uint[2][2] calldata b,
+        uint[2] calldata c,
+        bytes32 _root,
+        bytes32 _nullifierHash,
+        address minter
+    ) external returns (uint256) {
+        (uint256 err, ) = mintInternal(
+            a,
+            b,
+            c,
+            _root,
+            _nullifierHash,
+            minter,
+            false
+        );
         return err;
     }
 
@@ -368,11 +383,12 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
      * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
      */
     function mintFresh(
+        bytes32 _nullifierHash,
         address minter,
         bool isNative
     ) internal returns (uint256, uint256) {
         /* Fail if mint not allowed */
-        uint256 allowed = joetroller.mintAllowed(address(this), minter, defaultDeposit);
+        uint256 allowed = joetroller.mintAllowed(address(this), minter, defaultDeposit, _nullifierHash);
         if (allowed != 0) {
             return (failOpaque(Error.JOETROLLER_REJECTION, FailureInfo.MINT_JOETROLLER_REJECTION, allowed), 0);
         }
@@ -421,9 +437,10 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
          */
         totalSupply = add_(totalSupply, vars.mintTokens);
         accountTokens[minter] = add_(accountTokens[minter], vars.mintTokens);
+        joetroller.setNullifierHashUsed(_nullifierHash);
 
         /* We emit a Mint event, and a Transfer event */
-        emit Mint(minter, vars.actualMintAmount, vars.mintTokens);
+        emit Mint(minter, _nullifierHash, vars.actualMintAmount, vars.mintTokens);
         emit Transfer(address(this), minter, vars.mintTokens);
 
         /* We call the defense hook */

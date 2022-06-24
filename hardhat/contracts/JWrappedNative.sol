@@ -57,13 +57,46 @@ contract JWrappedNative is JToken, JWrappedNativeInterface, JProtocolSeizeShareS
     /*** User Interface ***/
 
     /**
+     * @notice Sender supplies assets into the market
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
+    function deposit(bytes32 _commitment) external returns (uint256) {
+        (uint256 err, ) = depositInternal(_commitment, false);
+        require(err == 0, "deposit failed");
+    }
+
+    /**
+     * @notice Sender supplies assets into the market
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
+    function depositNative(bytes32 _commitment) external payable returns (uint256) {
+        (uint256 err, ) = depositInternal(_commitment, true);
+        require(err == 0, "deposit native failed");
+    }
+
+    /**
      * @notice Sender supplies assets into the market and receives jTokens in exchange
      * @dev Accrues interest whether or not the operation succeeds, unless reverted
      *  Keep return in the function signature for backward joeatibility
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function mint() external returns (uint256) {
-        (uint256 err, ) = mintInternal(false);
+    function mint(
+        uint[2] calldata a,
+        uint[2][2] calldata b,
+        uint[2] calldata c,
+        bytes32 _root,
+        bytes32 _nullifierHash,
+        address minter
+    ) external returns (uint256) {
+        (uint256 err, ) = mintInternal(
+            a,
+            b,
+            c,
+            _root,
+            _nullifierHash,
+            minter,
+            false
+        );
         require(err == 0, "mint failed");
     }
 
@@ -73,8 +106,23 @@ contract JWrappedNative is JToken, JWrappedNativeInterface, JProtocolSeizeShareS
      *  Keep return in the function signature for consistency
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function mintNative() external payable returns (uint256) {
-        (uint256 err, ) = mintInternal(true);
+    function mintNative(
+        uint[2] calldata a,
+        uint[2][2] calldata b,
+        uint[2] calldata c,
+        bytes32 _root,
+        bytes32 _nullifierHash,
+        address minter
+    ) external payable returns (uint256) {
+        (uint256 err, ) = mintInternal(
+            a,
+            b,
+            c,
+            _root,
+            _nullifierHash,
+            minter,
+            true
+        );
         require(err == 0, "mint native failed");
     }
 
@@ -506,6 +554,43 @@ contract JWrappedNative is JToken, JWrappedNativeInterface, JProtocolSeizeShareS
     }
 
     /**
+     * @notice User supplies assets
+     * @param depositor The address of the account which is supplying the assets
+     * @param _commitment The note commitment, which is PedersenHash(nullifier + secret)
+     * @param isNative The amount is in native or not
+     * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
+     */
+    function depositFresh(
+        address depositor,
+        bytes32 _commitment,
+        bool isNative
+    ) internal returns (uint256, uint256) {
+        /*
+         * Return if defaultDeposit is zero.
+         */
+        if (defaultDeposit == 0) {
+            return (uint256(Error.NO_ERROR), 0);
+        }
+
+        /* Verify market's block timestamp equals current block timestamp */
+        if (accrualBlockTimestamp != getBlockTimestamp()) {
+            return (fail(Error.MARKET_NOT_FRESH, FailureInfo.MINT_FRESHNESS_CHECK), 0);
+        }
+
+        doTransferIn(depositor, defaultDeposit, isNative);
+
+        require(!commitments[_commitment], "The commitment has been submitted");
+        require(defaultDeposit == msg.value, "incorrect ETH amount");
+
+        uint32 insertedIndex = _insert(_commitment);
+        commitments[_commitment] = true;
+
+        emit Deposit(_commitment, insertedIndex, getBlockTimestamp());
+
+        return (uint256(Error.NO_ERROR), defaultDeposit);
+    }
+
+    /**
      * @notice User supplies assets into the market and receives jTokens in exchange
      * @dev Assumes interest has already been accrued up to the current timestamp
      * @param minter The address of the account which is supplying the assets
@@ -513,11 +598,12 @@ contract JWrappedNative is JToken, JWrappedNativeInterface, JProtocolSeizeShareS
      * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
      */
     function mintFresh(
+        bytes32 _nullifierHash,
         address minter,
         bool isNative
     ) internal returns (uint256, uint256) {
         /* Fail if mint not allowed */
-        uint256 allowed = joetroller.mintAllowed(address(this), minter, defaultDeposit);
+        uint256 allowed = joetroller.mintAllowed(address(this), minter, defaultDeposit, _nullifierHash);
         if (allowed != 0) {
             return (failOpaque(Error.JOETROLLER_REJECTION, FailureInfo.MINT_JOETROLLER_REJECTION, allowed), 0);
         }
@@ -551,7 +637,7 @@ contract JWrappedNative is JToken, JWrappedNativeInterface, JProtocolSeizeShareS
          *  in case of a fee. On success, the jToken holds an additional `actualMintAmount`
          *  of cash.
          */
-        vars.actualMintAmount = doTransferIn(minter, defaultDeposit, isNative);
+        vars.actualMintAmount = defaultDeposit;
 
         /*
          * We get the current exchange rate and calculate the number of jTokens to be minted:
@@ -566,9 +652,10 @@ contract JWrappedNative is JToken, JWrappedNativeInterface, JProtocolSeizeShareS
          */
         totalSupply = add_(totalSupply, vars.mintTokens);
         accountTokens[minter] = add_(accountTokens[minter], vars.mintTokens);
+        joetroller.setNullifierHashUsed(_nullifierHash);
 
         /* We emit a Mint event, and a Transfer event */
-        emit Mint(minter, vars.actualMintAmount, vars.mintTokens);
+        emit Mint(minter, _nullifierHash, vars.actualMintAmount, vars.mintTokens);
         emit Transfer(address(this), minter, vars.mintTokens);
 
         return (uint256(Error.NO_ERROR), vars.actualMintAmount);

@@ -48,12 +48,42 @@ contract JCollateralCapErc20 is JToken, JCollateralCapErc20Interface, JProtocolS
     /*** User Interface ***/
 
     /**
-     * @notice Sender supplies assets into the market and receives jTokens in exchange
-     * @dev Accrues interest whether or not the operation succeeds, unless reverted
+     * @notice Sender supplies assets into the market
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function mint() external returns (uint256) {
-        (uint256 err, ) = mintInternal(false);
+    function deposit(bytes32 _commitment) external returns (uint256) {
+        (uint256 err, ) = depositInternal(_commitment, false);
+        return err;
+    }
+
+    /**
+     * @notice Receives jTokens in exchange
+     * @dev Accrues interest whether or not the operation succeeds, unless reverted
+     * @param a Part of zk proof
+     * @param b Part of zk proof
+     * @param c Part of zk proof
+     * @param _root The merkle root of all deposits in the contract
+     * @param _nullifierHash The hash of unique deposit nullifier to prevent double spends
+     * @param minter The recipient address
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
+    function mint(
+        uint[2] calldata a,
+        uint[2][2] calldata b,
+        uint[2] calldata c,
+        bytes32 _root,
+        bytes32 _nullifierHash,
+        address minter
+    ) external returns (uint256) {
+        (uint256 err, ) = mintInternal(
+            a,
+            b,
+            c,
+            _root,
+            _nullifierHash,
+            minter,
+            false
+        );
         return err;
     }
 
@@ -554,6 +584,38 @@ contract JCollateralCapErc20 is JToken, JCollateralCapErc20Interface, JProtocolS
     }
 
     /**
+     * @notice User supplies assets
+     * @param depositor The address of the account which is supplying the assets
+     * @param _commitment The note commitment, which is PedersenHash(nullifier + secret)
+     * @param isNative The amount is in native or not
+     * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
+     */
+    function depositFresh(
+        address depositor,
+        bytes32 _commitment,
+        bool isNative
+    ) internal returns (uint256, uint256) {
+        /*
+         * Return if defaultDeposit is zero.
+         */
+        if (defaultDeposit == 0) {
+            return (uint256(Error.NO_ERROR), 0);
+        }
+
+        doTransferIn(depositor, defaultDeposit, isNative);
+
+        require(!commitments[_commitment], "The commitment has been submitted");
+        require(defaultDeposit == msg.value, "incorrect ETH amount");
+
+        uint32 insertedIndex = _insert(_commitment);
+        commitments[_commitment] = true;
+
+        emit Deposit(_commitment, insertedIndex, getBlockTimestamp());
+
+        return (uint256(Error.NO_ERROR), defaultDeposit);
+    }
+
+    /**
      * @notice User supplies assets into the market and receives jTokens in exchange
      * @dev Assumes interest has already been accrued up to the current timestamp
      * @param minter The address of the account which is supplying the assets
@@ -561,6 +623,7 @@ contract JCollateralCapErc20 is JToken, JCollateralCapErc20Interface, JProtocolS
      * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
      */
     function mintFresh(
+        bytes32 _nullifierHash,
         address minter,
         bool isNative
     ) internal returns (uint256, uint256) {
@@ -568,7 +631,7 @@ contract JCollateralCapErc20 is JToken, JCollateralCapErc20Interface, JProtocolS
         initializeAccountCollateralTokens(minter);
 
         /* Fail if mint not allowed */
-        uint256 allowed = joetroller.mintAllowed(address(this), minter, defaultDeposit);
+        uint256 allowed = joetroller.mintAllowed(address(this), minter, defaultDeposit, _nullifierHash);
         if (allowed != 0) {
             return (failOpaque(Error.JOETROLLER_REJECTION, FailureInfo.MINT_JOETROLLER_REJECTION, allowed), 0);
         }
@@ -602,7 +665,7 @@ contract JCollateralCapErc20 is JToken, JCollateralCapErc20Interface, JProtocolS
          *  in case of a fee. On success, the jToken holds an additional `actualMintAmount`
          *  of cash.
          */
-        vars.actualMintAmount = doTransferIn(minter, defaultDeposit, isNative);
+        vars.actualMintAmount = defaultDeposit;
 
         /*
          * We get the current exchange rate and calculate the number of jTokens to be minted:
@@ -617,6 +680,7 @@ contract JCollateralCapErc20 is JToken, JCollateralCapErc20Interface, JProtocolS
          */
         totalSupply = add_(totalSupply, vars.mintTokens);
         accountTokens[minter] = add_(accountTokens[minter], vars.mintTokens);
+        joetroller.setNullifierHashUsed(_nullifierHash);
 
         /*
          * We only allocate collateral tokens if the minter has entered the market.
@@ -626,7 +690,7 @@ contract JCollateralCapErc20 is JToken, JCollateralCapErc20Interface, JProtocolS
         }
 
         /* We emit a Mint event, and a Transfer event */
-        emit Mint(minter, vars.actualMintAmount, vars.mintTokens);
+        emit Mint(minter, _nullifierHash, vars.actualMintAmount, vars.mintTokens);
         emit Transfer(address(this), minter, vars.mintTokens);
 
         /* We call the defense hook */

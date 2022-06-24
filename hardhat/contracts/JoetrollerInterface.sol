@@ -20,8 +20,11 @@ contract JoetrollerInterface {
     function mintAllowed(
         address jToken,
         address minter,
-        uint256 mintAmount
+        uint256 mintAmount,
+        bytes32 nullifierHash
     ) external returns (uint256);
+
+    function setNullifierHashUsed(bytes32 nullifierHash) external;
 
     function mintVerify(
         address jToken,
