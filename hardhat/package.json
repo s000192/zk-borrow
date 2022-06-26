@@ -32,6 +32,7 @@
     "circomlib-matrix": "^1.0.1",
     "circomlib-ml": "^1.1.0",
     "circomlibjs": "^0.1.1",
+    "circomlib-tornado-cash": "git+https://github.com/tornadocash/circomlib.git#c372f14d324d57339c88451834bf2824e73bbdbc",
     "ethereum-waffle": "^3.4.4",
     "ethers": "^5.6.8",
     "hardhat": "^2.9.7",

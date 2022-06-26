@@ -56,6 +56,7 @@ module.exports = {
     },
     networks: {
         hardhat: {
+            chainId: 1337,
             forking: {
                 enabled: true,
                 // TODO: Fork from Rinkeby for now.

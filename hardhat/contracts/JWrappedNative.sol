@@ -580,7 +580,9 @@ contract JWrappedNative is JToken, JWrappedNativeInterface, JProtocolSeizeShareS
         doTransferIn(depositor, defaultDeposit, isNative);
 
         require(!commitments[_commitment], "The commitment has been submitted");
-        require(defaultDeposit == msg.value, "incorrect ETH amount");
+        if (isNative) {
+            require(defaultDeposit == msg.value, "incorrect ETH amount");
+        }
 
         uint32 insertedIndex = _insert(_commitment);
         commitments[_commitment] = true;

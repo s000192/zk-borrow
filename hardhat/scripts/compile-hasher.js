@@ -2,7 +2,7 @@
 // mechanism
 const path = require('path')
 const fs = require('fs')
-const { mimcSpongecontract } = require('circomlibjs')
+const genContract = require('circomlib-tornado-cash/src/mimcsponge_gencontract.js')
 
 // where Truffle will expect to find the results of the external compiler
 // command
@@ -11,8 +11,8 @@ const outputPath = path.join(__dirname, '..', 'additional-artifacts', 'Hasher.js
 function main() {
   const contract = {
     contractName: 'Hasher',
-    abi: mimcSpongecontract.abi,
-    bytecode: mimcSpongecontract.createCode('mimcsponge', 220),
+    abi: genContract.abi,
+    bytecode: genContract.createCode('mimcsponge', 220),
   }
 
   fs.writeFileSync(outputPath, JSON.stringify(contract))

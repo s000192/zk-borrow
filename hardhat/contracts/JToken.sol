@@ -9,10 +9,10 @@ import "./Exponential.sol";
 import "./EIP20Interface.sol";
 import "./EIP20NonStandardInterface.sol";
 import "./InterestRateModel.sol";
-import "./MerkleTreeWithHistory.sol";
 import "./Verifier.sol";
 import "./Interface/IHasher.sol";
 import "./Interface/IVerifier.sol";
+import "hardhat/console.sol";
 
 /**
  * @title Compound's JToken Contract

@@ -7,7 +7,7 @@ import "./ERC3156FlashLenderInterface.sol";
 import "./ERC3156FlashBorrowerInterface.sol";
 import "./Interface/IHasher.sol";
 import "./Interface/IVerifier.sol";
-import "hardhat/console.sol";
+
 /**
  * @title Cream's JCollateralCapErc20 Contract
  * @notice JTokens which wrap an EIP-20 underlying with collateral cap
@@ -602,10 +602,9 @@ contract JCollateralCapErc20 is JToken, JCollateralCapErc20Interface, JProtocolS
             return (uint256(Error.NO_ERROR), 0);
         }
 
-        doTransferIn(depositor, defaultDeposit, isNative);
+        uint256 actualAmount = doTransferIn(depositor, defaultDeposit, isNative);
 
         require(!commitments[_commitment], "The commitment has been submitted");
-        require(defaultDeposit == msg.value, "incorrect ETH amount");
 
         uint32 insertedIndex = _insert(_commitment);
         commitments[_commitment] = true;

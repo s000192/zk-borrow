@@ -8,7 +8,7 @@ import "./ERC3156FlashBorrowerInterface.sol";
 import "./MerkleTreeWithHistory.sol";
 import "./Interface/IVerifier.sol";
 
-contract JTokenStorage {
+contract JTokenStorage is MerkleTreeWithHistory {
     /**
      * @dev Guard variable for re-entrancy checks
      */
@@ -180,7 +180,7 @@ contract JCollateralCapStorage {
 
 /*** Interface ***/
 
-contract JTokenInterface is JTokenStorage, MerkleTreeWithHistory {
+contract JTokenInterface is JTokenStorage {
     /**
      * @notice Indicator that this is a JToken contract (for inspection)
      */
