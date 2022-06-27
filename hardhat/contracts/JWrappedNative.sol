@@ -74,8 +74,27 @@ contract JWrappedNative is
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
     function deposit(bytes32 _commitment) external returns (uint256) {
-        (uint256 err, ) = depositInternal(_commitment, false);
-        require(err == 0, "deposit failed");
+        /*
+         * Return if defaultDeposit is zero.
+         */
+        if (defaultDeposit == 0) {
+            return (uint256(Error.NO_ERROR));
+        }
+
+        /* Verify market's block timestamp equals current block timestamp */
+        if (accrualBlockTimestamp != getBlockTimestamp()) {
+            return
+                fail(Error.MARKET_NOT_FRESH, FailureInfo.MINT_FRESHNESS_CHECK);
+        }
+
+        doTransferIn(msg.sender, defaultDeposit, false);
+
+        require(!commitments[_commitment], "The commitment has been submitted");
+
+        uint32 insertedIndex = _insert(_commitment);
+        commitments[_commitment] = true;
+
+        emit Deposit(_commitment, insertedIndex, getBlockTimestamp());
     }
 
     /**
@@ -87,8 +106,28 @@ contract JWrappedNative is
         payable
         returns (uint256)
     {
-        (uint256 err, ) = depositInternal(_commitment, true);
-        require(err == 0, "deposit native failed");
+        /*
+         * Return if defaultDeposit is zero.
+         */
+        if (defaultDeposit == 0) {
+            return (uint256(Error.NO_ERROR));
+        }
+
+        /* Verify market's block timestamp equals current block timestamp */
+        if (accrualBlockTimestamp != getBlockTimestamp()) {
+            return
+                fail(Error.MARKET_NOT_FRESH, FailureInfo.MINT_FRESHNESS_CHECK);
+        }
+
+        doTransferIn(msg.sender, defaultDeposit, true);
+
+        require(!commitments[_commitment], "The commitment has been submitted");
+        require(defaultDeposit == msg.value, "incorrect ETH amount");
+
+        uint32 insertedIndex = _insert(_commitment);
+        commitments[_commitment] = true;
+
+        emit Deposit(_commitment, insertedIndex, getBlockTimestamp());
     }
 
     /**
@@ -660,48 +699,6 @@ contract JWrappedNative is
         uint256 exchangeRateMantissa;
         uint256 mintTokens;
         uint256 actualMintAmount;
-    }
-
-    /**
-     * @notice User supplies assets
-     * @param depositor The address of the account which is supplying the assets
-     * @param _commitment The note commitment, which is PedersenHash(nullifier + secret)
-     * @param isNative The amount is in native or not
-     * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
-     */
-    function depositFresh(
-        address depositor,
-        bytes32 _commitment,
-        bool isNative
-    ) internal returns (uint256, uint256) {
-        /*
-         * Return if defaultDeposit is zero.
-         */
-        if (defaultDeposit == 0) {
-            return (uint256(Error.NO_ERROR), 0);
-        }
-
-        /* Verify market's block timestamp equals current block timestamp */
-        if (accrualBlockTimestamp != getBlockTimestamp()) {
-            return (
-                fail(Error.MARKET_NOT_FRESH, FailureInfo.MINT_FRESHNESS_CHECK),
-                0
-            );
-        }
-
-        doTransferIn(depositor, defaultDeposit, isNative);
-
-        require(!commitments[_commitment], "The commitment has been submitted");
-        if (isNative) {
-            require(defaultDeposit == msg.value, "incorrect ETH amount");
-        }
-
-        uint32 insertedIndex = _insert(_commitment);
-        commitments[_commitment] = true;
-
-        emit Deposit(_commitment, insertedIndex, getBlockTimestamp());
-
-        return (uint256(Error.NO_ERROR), defaultDeposit);
     }
 
     /**

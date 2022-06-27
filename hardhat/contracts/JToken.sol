@@ -41,11 +41,17 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         IVerifier verifier_
     ) public {
         require(msg.sender == admin, "only admin may initialize the market");
-        require(accrualBlockTimestamp == 0 && borrowIndex == 0, "market may only be initialized once");
+        require(
+            accrualBlockTimestamp == 0 && borrowIndex == 0,
+            "market may only be initialized once"
+        );
 
         // Set initial exchange rate
         initialExchangeRateMantissa = initialExchangeRateMantissa_;
-        require(initialExchangeRateMantissa > 0, "initial exchange rate must be greater than zero.");
+        require(
+            initialExchangeRateMantissa > 0,
+            "initial exchange rate must be greater than zero."
+        );
 
         // Set the joetroller
         uint256 err = _setJoetroller(joetroller_);
@@ -57,7 +63,10 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
 
         // Set the interest rate model (depends on block timestamp / borrow index)
         err = _setInterestRateModelFresh(interestRateModel_);
-        require(err == uint256(Error.NO_ERROR), "setting interest rate model failed");
+        require(
+            err == uint256(Error.NO_ERROR),
+            "setting interest rate model failed"
+        );
 
         defaultDeposit = defaultDeposit_;
         name = name_;
@@ -77,8 +86,14 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @param amount The number of tokens to transfer
      * @return Whether or not the transfer succeeded
      */
-    function transfer(address dst, uint256 amount) external nonReentrant returns (bool) {
-        return transferTokens(msg.sender, msg.sender, dst, amount) == uint256(Error.NO_ERROR);
+    function transfer(address dst, uint256 amount)
+        external
+        nonReentrant
+        returns (bool)
+    {
+        return
+            transferTokens(msg.sender, msg.sender, dst, amount) ==
+            uint256(Error.NO_ERROR);
     }
 
     /**
@@ -93,7 +108,9 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         address dst,
         uint256 amount
     ) external nonReentrant returns (bool) {
-        return transferTokens(msg.sender, src, dst, amount) == uint256(Error.NO_ERROR);
+        return
+            transferTokens(msg.sender, src, dst, amount) ==
+            uint256(Error.NO_ERROR);
     }
 
     /**
@@ -117,7 +134,11 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @param spender The address of the account which may transfer tokens
      * @return The number of tokens allowed to be spent (-1 means infinite)
      */
-    function allowance(address owner, address spender) external view returns (uint256) {
+    function allowance(address owner, address spender)
+        external
+        view
+        returns (uint256)
+    {
         return transferAllowances[owner][spender];
     }
 
@@ -161,7 +182,12 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         uint256 borrowBalance = borrowBalanceStoredInternal(account);
         uint256 exchangeRateMantissa = exchangeRateStoredInternal();
 
-        return (uint256(Error.NO_ERROR), jTokenBalance, borrowBalance, exchangeRateMantissa);
+        return (
+            uint256(Error.NO_ERROR),
+            jTokenBalance,
+            borrowBalance,
+            exchangeRateMantissa
+        );
     }
 
     /**
@@ -177,7 +203,12 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @return The borrow interest rate per sec, scaled by 1e18
      */
     function borrowRatePerSecond() external view returns (uint256) {
-        return interestRateModel.getBorrowRate(getCashPrior(), totalBorrows, totalReserves);
+        return
+            interestRateModel.getBorrowRate(
+                getCashPrior(),
+                totalBorrows,
+                totalReserves
+            );
     }
 
     /**
@@ -185,14 +216,24 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @return The supply interest rate per sec, scaled by 1e18
      */
     function supplyRatePerSecond() external view returns (uint256) {
-        return interestRateModel.getSupplyRate(getCashPrior(), totalBorrows, totalReserves, reserveFactorMantissa);
+        return
+            interestRateModel.getSupplyRate(
+                getCashPrior(),
+                totalBorrows,
+                totalReserves,
+                reserveFactorMantissa
+            );
     }
 
     /**
      * @notice Returns the estimated per-sec borrow interest rate for this jToken after some change
      * @return The borrow interest rate per sec, scaled by 1e18
      */
-    function estimateBorrowRatePerSecondAfterChange(uint256 change, bool repay) external view returns (uint256) {
+    function estimateBorrowRatePerSecondAfterChange(uint256 change, bool repay)
+        external
+        view
+        returns (uint256)
+    {
         uint256 cashPriorNew;
         uint256 totalBorrowsNew;
 
@@ -203,14 +244,23 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
             cashPriorNew = sub_(getCashPrior(), change);
             totalBorrowsNew = add_(totalBorrows, change);
         }
-        return interestRateModel.getBorrowRate(cashPriorNew, totalBorrowsNew, totalReserves);
+        return
+            interestRateModel.getBorrowRate(
+                cashPriorNew,
+                totalBorrowsNew,
+                totalReserves
+            );
     }
 
     /**
      * @notice Returns the estimated per-sec supply interest rate for this jToken after some change
      * @return The supply interest rate per sec, scaled by 1e18
      */
-    function estimateSupplyRatePerSecondAfterChange(uint256 change, bool repay) external view returns (uint256) {
+    function estimateSupplyRatePerSecondAfterChange(uint256 change, bool repay)
+        external
+        view
+        returns (uint256)
+    {
         uint256 cashPriorNew;
         uint256 totalBorrowsNew;
 
@@ -222,7 +272,13 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
             totalBorrowsNew = add_(totalBorrows, change);
         }
 
-        return interestRateModel.getSupplyRate(cashPriorNew, totalBorrowsNew, totalReserves, reserveFactorMantissa);
+        return
+            interestRateModel.getSupplyRate(
+                cashPriorNew,
+                totalBorrowsNew,
+                totalReserves,
+                reserveFactorMantissa
+            );
     }
 
     /**
@@ -230,7 +286,10 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @return The total borrows with interest
      */
     function totalBorrowsCurrent() external nonReentrant returns (uint256) {
-        require(accrueInterest() == uint256(Error.NO_ERROR), "accrue interest failed");
+        require(
+            accrueInterest() == uint256(Error.NO_ERROR),
+            "accrue interest failed"
+        );
         return totalBorrows;
     }
 
@@ -239,8 +298,15 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @param account The address whose balance should be calculated after updating borrowIndex
      * @return The calculated balance
      */
-    function borrowBalanceCurrent(address account) external nonReentrant returns (uint256) {
-        require(accrueInterest() == uint256(Error.NO_ERROR), "accrue interest failed");
+    function borrowBalanceCurrent(address account)
+        external
+        nonReentrant
+        returns (uint256)
+    {
+        require(
+            accrueInterest() == uint256(Error.NO_ERROR),
+            "accrue interest failed"
+        );
         return borrowBalanceStored(account);
     }
 
@@ -249,7 +315,11 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @param account The address whose balance should be calculated
      * @return The calculated balance
      */
-    function borrowBalanceStored(address account) public view returns (uint256) {
+    function borrowBalanceStored(address account)
+        public
+        view
+        returns (uint256)
+    {
         return borrowBalanceStoredInternal(account);
     }
 
@@ -258,7 +328,11 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @param account The address whose balance should be calculated
      * @return the calculated balance or 0 if error code is non-zero
      */
-    function borrowBalanceStoredInternal(address account) internal view returns (uint256) {
+    function borrowBalanceStoredInternal(address account)
+        internal
+        view
+        returns (uint256)
+    {
         /* Get borrowBalance and borrowIndex */
         BorrowSnapshot storage borrowSnapshot = accountBorrows[account];
 
@@ -272,8 +346,14 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         /* Calculate new borrow balance using the interest index:
          *  recentBorrowBalance = borrower.borrowBalance * market.borrowIndex / borrower.borrowIndex
          */
-        uint256 principalTimesIndex = mul_(borrowSnapshot.principal, borrowIndex);
-        uint256 result = div_(principalTimesIndex, borrowSnapshot.interestIndex);
+        uint256 principalTimesIndex = mul_(
+            borrowSnapshot.principal,
+            borrowIndex
+        );
+        uint256 result = div_(
+            principalTimesIndex,
+            borrowSnapshot.interestIndex
+        );
         return result;
     }
 
@@ -282,7 +362,10 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @return Calculated exchange rate scaled by 1e18
      */
     function exchangeRateCurrent() public nonReentrant returns (uint256) {
-        require(accrueInterest() == uint256(Error.NO_ERROR), "accrue interest failed");
+        require(
+            accrueInterest() == uint256(Error.NO_ERROR),
+            "accrue interest failed"
+        );
         return exchangeRateStored();
     }
 
@@ -314,8 +397,14 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
              *  exchangeRate = (totalCash + totalBorrows - totalReserves) / totalSupply
              */
             uint256 totalCash = getCashPrior();
-            uint256 cashPlusBorrowsMinusReserves = sub_(add_(totalCash, totalBorrows), totalReserves);
-            uint256 exchangeRate = div_(cashPlusBorrowsMinusReserves, Exp({mantissa: _totalSupply}));
+            uint256 cashPlusBorrowsMinusReserves = sub_(
+                add_(totalCash, totalBorrows),
+                totalReserves
+            );
+            uint256 exchangeRate = div_(
+                cashPlusBorrowsMinusReserves,
+                Exp({mantissa: _totalSupply})
+            );
             return exchangeRate;
         }
     }
@@ -350,11 +439,21 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         uint256 borrowIndexPrior = borrowIndex;
 
         /* Calculate the current borrow interest rate */
-        uint256 borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, borrowsPrior, reservesPrior);
-        require(borrowRateMantissa <= borrowRateMaxMantissa, "borrow rate is absurdly high");
+        uint256 borrowRateMantissa = interestRateModel.getBorrowRate(
+            cashPrior,
+            borrowsPrior,
+            reservesPrior
+        );
+        require(
+            borrowRateMantissa <= borrowRateMaxMantissa,
+            "borrow rate is absurdly high"
+        );
 
         /* Calculate the number of seconds elapsed since the last accrual */
-        uint256 timestampDelta = sub_(currentBlockTimestamp, accrualBlockTimestampPrior);
+        uint256 timestampDelta = sub_(
+            currentBlockTimestamp,
+            accrualBlockTimestampPrior
+        );
 
         /*
          * Calculate the interest accumulated into borrows and reserves and the new index:
@@ -365,15 +464,25 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
          *  borrowIndexNew = simpleInterestFactor * borrowIndex + borrowIndex
          */
 
-        Exp memory simpleInterestFactor = mul_(Exp({mantissa: borrowRateMantissa}), timestampDelta);
-        uint256 interestAccumulated = mul_ScalarTruncate(simpleInterestFactor, borrowsPrior);
+        Exp memory simpleInterestFactor = mul_(
+            Exp({mantissa: borrowRateMantissa}),
+            timestampDelta
+        );
+        uint256 interestAccumulated = mul_ScalarTruncate(
+            simpleInterestFactor,
+            borrowsPrior
+        );
         uint256 totalBorrowsNew = add_(interestAccumulated, borrowsPrior);
         uint256 totalReservesNew = mul_ScalarTruncateAddUInt(
             Exp({mantissa: reserveFactorMantissa}),
             interestAccumulated,
             reservesPrior
         );
-        uint256 borrowIndexNew = mul_ScalarTruncateAddUInt(simpleInterestFactor, borrowIndexPrior, borrowIndexPrior);
+        uint256 borrowIndexNew = mul_ScalarTruncateAddUInt(
+            simpleInterestFactor,
+            borrowIndexPrior,
+            borrowIndexPrior
+        );
 
         /////////////////////////
         // EFFECTS & INTERACTIONS
@@ -386,19 +495,14 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         totalReserves = totalReservesNew;
 
         /* We emit an AccrueInterest event */
-        emit AccrueInterest(cashPrior, interestAccumulated, borrowIndexNew, totalBorrowsNew);
+        emit AccrueInterest(
+            cashPrior,
+            interestAccumulated,
+            borrowIndexNew,
+            totalBorrowsNew
+        );
 
         return uint256(Error.NO_ERROR);
-    }
-
-    /**
-     * @notice Sender supplies assets into the market
-     * @param _commitment The note commitment, which is PedersenHash(nullifier + secret)
-     * @param isNative The amount is in native or not
-     * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
-     */
-    function depositInternal(bytes32 _commitment, bool isNative) internal returns (uint256, uint256) {
-        return depositFresh(msg.sender, _commitment, isNative);
     }
 
     /**
@@ -408,9 +512,9 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
      */
     function mintInternal(
-        uint[2] memory a,
-        uint[2][2] memory b,
-        uint[2] memory c,
+        uint256[2] memory a,
+        uint256[2][2] memory b,
+        uint256[2] memory c,
         bytes32 _root,
         bytes32 _nullifierHash,
         address minter,
@@ -419,24 +523,23 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         require(isKnownRoot(_root), "Cannot find your merkle root");
         require(
             verifier.verifyProof(
-              a,
-              b,
-              c,
-              [uint256(_root), uint256(_nullifierHash)]
+                a,
+                b,
+                c,
+                [uint256(_root), uint256(_nullifierHash)]
             ),
             "Invalid proof"
         );
         uint256 error = accrueInterest();
         if (error != uint256(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
-            return (fail(Error(error), FailureInfo.MINT_ACCRUE_INTEREST_FAILED), 0);
+            return (
+                fail(Error(error), FailureInfo.MINT_ACCRUE_INTEREST_FAILED),
+                0
+            );
         }
         // mintFresh emits the actual Mint event if successful and logs on errors, so we don't need to
-        return mintFresh(
-            _nullifierHash,
-            minter,
-            isNative
-        );
+        return mintFresh(_nullifierHash, minter, isNative);
     }
 
     /**
@@ -446,11 +549,16 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @param isNative The amount is in native or not
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function redeemInternal(uint256 redeemTokens, bool isNative) internal nonReentrant returns (uint256) {
+    function redeemInternal(uint256 redeemTokens, bool isNative)
+        internal
+        nonReentrant
+        returns (uint256)
+    {
         uint256 error = accrueInterest();
         if (error != uint256(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
-            return fail(Error(error), FailureInfo.REDEEM_ACCRUE_INTEREST_FAILED);
+            return
+                fail(Error(error), FailureInfo.REDEEM_ACCRUE_INTEREST_FAILED);
         }
         // redeemFresh emits redeem-specific logs on errors, so we don't need to
         return redeemFresh(msg.sender, redeemTokens, 0, isNative);
@@ -463,11 +571,16 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @param isNative The amount is in native or not
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function redeemUnderlyingInternal(uint256 redeemAmount, bool isNative) internal nonReentrant returns (uint256) {
+    function redeemUnderlyingInternal(uint256 redeemAmount, bool isNative)
+        internal
+        nonReentrant
+        returns (uint256)
+    {
         uint256 error = accrueInterest();
         if (error != uint256(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
-            return fail(Error(error), FailureInfo.REDEEM_ACCRUE_INTEREST_FAILED);
+            return
+                fail(Error(error), FailureInfo.REDEEM_ACCRUE_INTEREST_FAILED);
         }
         // redeemFresh emits redeem-specific logs on errors, so we don't need to
         return redeemFresh(msg.sender, 0, redeemAmount, isNative);
@@ -479,11 +592,16 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @param isNative The amount is in native or not
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function borrowInternal(uint256 borrowAmount, bool isNative) internal nonReentrant returns (uint256) {
+    function borrowInternal(uint256 borrowAmount, bool isNative)
+        internal
+        nonReentrant
+        returns (uint256)
+    {
         uint256 error = accrueInterest();
         if (error != uint256(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
-            return fail(Error(error), FailureInfo.BORROW_ACCRUE_INTEREST_FAILED);
+            return
+                fail(Error(error), FailureInfo.BORROW_ACCRUE_INTEREST_FAILED);
         }
         // borrowFresh emits borrow-specific logs on errors, so we don't need to
         return borrowFresh(msg.sender, borrowAmount, isNative);
@@ -508,9 +626,18 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         bool isNative
     ) internal returns (uint256) {
         /* Fail if borrow not allowed */
-        uint256 allowed = joetroller.borrowAllowed(address(this), borrower, borrowAmount);
+        uint256 allowed = joetroller.borrowAllowed(
+            address(this),
+            borrower,
+            borrowAmount
+        );
         if (allowed != 0) {
-            return failOpaque(Error.JOETROLLER_REJECTION, FailureInfo.BORROW_JOETROLLER_REJECTION, allowed);
+            return
+                failOpaque(
+                    Error.JOETROLLER_REJECTION,
+                    FailureInfo.BORROW_JOETROLLER_REJECTION,
+                    allowed
+                );
         }
 
         /*
@@ -518,19 +645,29 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
          * Put behind `borrowAllowed` for accuring potential JOE rewards.
          */
         if (borrowAmount == 0) {
-            accountBorrows[borrower].principal = borrowBalanceStoredInternal(borrower);
+            accountBorrows[borrower].principal = borrowBalanceStoredInternal(
+                borrower
+            );
             accountBorrows[borrower].interestIndex = borrowIndex;
             return uint256(Error.NO_ERROR);
         }
 
         /* Verify market's block timestamp equals current block timestamp */
         if (accrualBlockTimestamp != getBlockTimestamp()) {
-            return fail(Error.MARKET_NOT_FRESH, FailureInfo.BORROW_FRESHNESS_CHECK);
+            return
+                fail(
+                    Error.MARKET_NOT_FRESH,
+                    FailureInfo.BORROW_FRESHNESS_CHECK
+                );
         }
 
         /* Fail gracefully if protocol has insufficient underlying cash */
         if (getCashPrior() < borrowAmount) {
-            return fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.BORROW_CASH_NOT_AVAILABLE);
+            return
+                fail(
+                    Error.TOKEN_INSUFFICIENT_CASH,
+                    FailureInfo.BORROW_CASH_NOT_AVAILABLE
+                );
         }
 
         BorrowLocalVars memory vars;
@@ -562,7 +699,12 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         totalBorrows = vars.totalBorrowsNew;
 
         /* We emit a Borrow event */
-        emit Borrow(borrower, borrowAmount, vars.accountBorrowsNew, vars.totalBorrowsNew);
+        emit Borrow(
+            borrower,
+            borrowAmount,
+            vars.accountBorrowsNew,
+            vars.totalBorrowsNew
+        );
 
         /* We call the defense hook */
         // unused function
@@ -577,11 +719,21 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @param isNative The amount is in native or not
      * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual repayment amount.
      */
-    function repayBorrowInternal(uint256 repayAmount, bool isNative) internal nonReentrant returns (uint256, uint256) {
+    function repayBorrowInternal(uint256 repayAmount, bool isNative)
+        internal
+        nonReentrant
+        returns (uint256, uint256)
+    {
         uint256 error = accrueInterest();
         if (error != uint256(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
-            return (fail(Error(error), FailureInfo.REPAY_BORROW_ACCRUE_INTEREST_FAILED), 0);
+            return (
+                fail(
+                    Error(error),
+                    FailureInfo.REPAY_BORROW_ACCRUE_INTEREST_FAILED
+                ),
+                0
+            );
         }
         // repayBorrowFresh emits repay-borrow-specific logs on errors, so we don't need to
         return repayBorrowFresh(msg.sender, msg.sender, repayAmount, isNative);
@@ -602,7 +754,13 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         uint256 error = accrueInterest();
         if (error != uint256(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
-            return (fail(Error(error), FailureInfo.REPAY_BEHALF_ACCRUE_INTEREST_FAILED), 0);
+            return (
+                fail(
+                    Error(error),
+                    FailureInfo.REPAY_BEHALF_ACCRUE_INTEREST_FAILED
+                ),
+                0
+            );
         }
         // repayBorrowFresh emits repay-borrow-specific logs on errors, so we don't need to
         return repayBorrowFresh(msg.sender, borrower, repayAmount, isNative);
@@ -634,9 +792,21 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         bool isNative
     ) internal returns (uint256, uint256) {
         /* Fail if repayBorrow not allowed */
-        uint256 allowed = joetroller.repayBorrowAllowed(address(this), payer, borrower, repayAmount);
+        uint256 allowed = joetroller.repayBorrowAllowed(
+            address(this),
+            payer,
+            borrower,
+            repayAmount
+        );
         if (allowed != 0) {
-            return (failOpaque(Error.JOETROLLER_REJECTION, FailureInfo.REPAY_BORROW_JOETROLLER_REJECTION, allowed), 0);
+            return (
+                failOpaque(
+                    Error.JOETROLLER_REJECTION,
+                    FailureInfo.REPAY_BORROW_JOETROLLER_REJECTION,
+                    allowed
+                ),
+                0
+            );
         }
 
         /*
@@ -644,14 +814,22 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
          * Put behind `repayBorrowAllowed` for accuring potential JOE rewards.
          */
         if (repayAmount == 0) {
-            accountBorrows[borrower].principal = borrowBalanceStoredInternal(borrower);
+            accountBorrows[borrower].principal = borrowBalanceStoredInternal(
+                borrower
+            );
             accountBorrows[borrower].interestIndex = borrowIndex;
             return (uint256(Error.NO_ERROR), 0);
         }
 
         /* Verify market's block timestamp equals current block timestamp */
         if (accrualBlockTimestamp != getBlockTimestamp()) {
-            return (fail(Error.MARKET_NOT_FRESH, FailureInfo.REPAY_BORROW_FRESHNESS_CHECK), 0);
+            return (
+                fail(
+                    Error.MARKET_NOT_FRESH,
+                    FailureInfo.REPAY_BORROW_FRESHNESS_CHECK
+                ),
+                0
+            );
         }
 
         RepayBorrowLocalVars memory vars;
@@ -680,14 +858,21 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
          *  doTransferIn reverts if anything goes wrong, since we can't be sure if side effects occurred.
          *   it returns the amount actually transferred, in case of a fee.
          */
-        vars.actualRepayAmount = doTransferIn(payer, vars.repayAmount, isNative);
+        vars.actualRepayAmount = doTransferIn(
+            payer,
+            vars.repayAmount,
+            isNative
+        );
 
         /*
          * We calculate the new borrower and total borrow balances, failing on underflow:
          *  accountBorrowsNew = accountBorrows - actualRepayAmount
          *  totalBorrowsNew = totalBorrows - actualRepayAmount
          */
-        vars.accountBorrowsNew = sub_(vars.accountBorrows, vars.actualRepayAmount);
+        vars.accountBorrowsNew = sub_(
+            vars.accountBorrows,
+            vars.actualRepayAmount
+        );
         vars.totalBorrowsNew = sub_(totalBorrows, vars.actualRepayAmount);
 
         /* We write the previously calculated values into storage */
@@ -696,7 +881,13 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         totalBorrows = vars.totalBorrowsNew;
 
         /* We emit a RepayBorrow event */
-        emit RepayBorrow(payer, borrower, vars.actualRepayAmount, vars.accountBorrowsNew, vars.totalBorrowsNew);
+        emit RepayBorrow(
+            payer,
+            borrower,
+            vars.actualRepayAmount,
+            vars.accountBorrowsNew,
+            vars.totalBorrowsNew
+        );
 
         /* We call the defense hook */
         // unused function
@@ -723,17 +914,36 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         uint256 error = accrueInterest();
         if (error != uint256(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted liquidation failed
-            return (fail(Error(error), FailureInfo.LIQUIDATE_ACCRUE_BORROW_INTEREST_FAILED), 0);
+            return (
+                fail(
+                    Error(error),
+                    FailureInfo.LIQUIDATE_ACCRUE_BORROW_INTEREST_FAILED
+                ),
+                0
+            );
         }
 
         error = jTokenCollateral.accrueInterest();
         if (error != uint256(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted liquidation failed
-            return (fail(Error(error), FailureInfo.LIQUIDATE_ACCRUE_COLLATERAL_INTEREST_FAILED), 0);
+            return (
+                fail(
+                    Error(error),
+                    FailureInfo.LIQUIDATE_ACCRUE_COLLATERAL_INTEREST_FAILED
+                ),
+                0
+            );
         }
 
         // liquidateBorrowFresh emits borrow-specific logs on errors, so we don't need to
-        return liquidateBorrowFresh(msg.sender, borrower, repayAmount, jTokenCollateral, isNative);
+        return
+            liquidateBorrowFresh(
+                msg.sender,
+                borrower,
+                repayAmount,
+                jTokenCollateral,
+                isNative
+            );
     }
 
     /**
@@ -762,43 +972,84 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
             repayAmount
         );
         if (allowed != 0) {
-            return (failOpaque(Error.JOETROLLER_REJECTION, FailureInfo.LIQUIDATE_JOETROLLER_REJECTION, allowed), 0);
+            return (
+                failOpaque(
+                    Error.JOETROLLER_REJECTION,
+                    FailureInfo.LIQUIDATE_JOETROLLER_REJECTION,
+                    allowed
+                ),
+                0
+            );
         }
 
         /* Verify market's block timestamp equals current block timestamp */
         if (accrualBlockTimestamp != getBlockTimestamp()) {
-            return (fail(Error.MARKET_NOT_FRESH, FailureInfo.LIQUIDATE_FRESHNESS_CHECK), 0);
+            return (
+                fail(
+                    Error.MARKET_NOT_FRESH,
+                    FailureInfo.LIQUIDATE_FRESHNESS_CHECK
+                ),
+                0
+            );
         }
 
         /* Verify jTokenCollateral market's block timestamp equals current block timestamp */
         if (jTokenCollateral.accrualBlockTimestamp() != getBlockTimestamp()) {
-            return (fail(Error.MARKET_NOT_FRESH, FailureInfo.LIQUIDATE_COLLATERAL_FRESHNESS_CHECK), 0);
+            return (
+                fail(
+                    Error.MARKET_NOT_FRESH,
+                    FailureInfo.LIQUIDATE_COLLATERAL_FRESHNESS_CHECK
+                ),
+                0
+            );
         }
 
         /* Fail if borrower = liquidator */
         if (borrower == liquidator) {
-            return (fail(Error.INVALID_ACCOUNT_PAIR, FailureInfo.LIQUIDATE_LIQUIDATOR_IS_BORROWER), 0);
+            return (
+                fail(
+                    Error.INVALID_ACCOUNT_PAIR,
+                    FailureInfo.LIQUIDATE_LIQUIDATOR_IS_BORROWER
+                ),
+                0
+            );
         }
 
         /* Fail if repayAmount = 0 */
         if (repayAmount == 0) {
-            return (fail(Error.INVALID_CLOSE_AMOUNT_REQUESTED, FailureInfo.LIQUIDATE_CLOSE_AMOUNT_IS_ZERO), 0);
+            return (
+                fail(
+                    Error.INVALID_CLOSE_AMOUNT_REQUESTED,
+                    FailureInfo.LIQUIDATE_CLOSE_AMOUNT_IS_ZERO
+                ),
+                0
+            );
         }
 
         /* Fail if repayAmount = -1 */
         if (repayAmount == uint256(-1)) {
-            return (fail(Error.INVALID_CLOSE_AMOUNT_REQUESTED, FailureInfo.LIQUIDATE_CLOSE_AMOUNT_IS_UINT_MAX), 0);
+            return (
+                fail(
+                    Error.INVALID_CLOSE_AMOUNT_REQUESTED,
+                    FailureInfo.LIQUIDATE_CLOSE_AMOUNT_IS_UINT_MAX
+                ),
+                0
+            );
         }
 
         /* Fail if repayBorrow fails */
-        (uint256 repayBorrowError, uint256 actualRepayAmount) = repayBorrowFresh(
-            liquidator,
-            borrower,
-            repayAmount,
-            isNative
-        );
+        (
+            uint256 repayBorrowError,
+            uint256 actualRepayAmount
+        ) = repayBorrowFresh(liquidator, borrower, repayAmount, isNative);
         if (repayBorrowError != uint256(Error.NO_ERROR)) {
-            return (fail(Error(repayBorrowError), FailureInfo.LIQUIDATE_REPAY_BORROW_FRESH_FAILED), 0);
+            return (
+                fail(
+                    Error(repayBorrowError),
+                    FailureInfo.LIQUIDATE_REPAY_BORROW_FRESH_FAILED
+                ),
+                0
+            );
         }
 
         /////////////////////////
@@ -806,29 +1057,51 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         // (No safe failures beyond this point)
 
         /* We calculate the number of collateral tokens that will be seized */
-        (uint256 amountSeizeError, uint256 seizeTokens) = joetroller.liquidateCalculateSeizeTokens(
-            address(this),
-            address(jTokenCollateral),
-            actualRepayAmount
+        (uint256 amountSeizeError, uint256 seizeTokens) = joetroller
+            .liquidateCalculateSeizeTokens(
+                address(this),
+                address(jTokenCollateral),
+                actualRepayAmount
+            );
+        require(
+            amountSeizeError == uint256(Error.NO_ERROR),
+            "LIQUIDATE_JOETROLLER_CALCULATE_AMOUNT_SEIZE_FAILED"
         );
-        require(amountSeizeError == uint256(Error.NO_ERROR), "LIQUIDATE_JOETROLLER_CALCULATE_AMOUNT_SEIZE_FAILED");
 
         /* Revert if borrower collateral token balance < seizeTokens */
-        require(jTokenCollateral.balanceOf(borrower) >= seizeTokens, "LIQUIDATE_SEIZE_TOO_MUCH");
+        require(
+            jTokenCollateral.balanceOf(borrower) >= seizeTokens,
+            "LIQUIDATE_SEIZE_TOO_MUCH"
+        );
 
         // If this is also the collateral, run seizeInternal to avoid re-entrancy, otherwise make an external call
         uint256 seizeError;
         if (address(jTokenCollateral) == address(this)) {
-            seizeError = seizeInternal(address(this), liquidator, borrower, seizeTokens);
+            seizeError = seizeInternal(
+                address(this),
+                liquidator,
+                borrower,
+                seizeTokens
+            );
         } else {
-            seizeError = jTokenCollateral.seize(liquidator, borrower, seizeTokens);
+            seizeError = jTokenCollateral.seize(
+                liquidator,
+                borrower,
+                seizeTokens
+            );
         }
 
         /* Revert if seize tokens fails (since we cannot be sure of side effects) */
         require(seizeError == uint256(Error.NO_ERROR), "token seizure failed");
 
         /* We emit a LiquidateBorrow event */
-        emit LiquidateBorrow(liquidator, borrower, actualRepayAmount, address(jTokenCollateral), seizeTokens);
+        emit LiquidateBorrow(
+            liquidator,
+            borrower,
+            actualRepayAmount,
+            address(jTokenCollateral),
+            seizeTokens
+        );
 
         /* We call the defense hook */
         // unused function
@@ -862,10 +1135,17 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @param newPendingAdmin New pending admin.
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setPendingAdmin(address payable newPendingAdmin) external returns (uint256) {
+    function _setPendingAdmin(address payable newPendingAdmin)
+        external
+        returns (uint256)
+    {
         // Check caller = admin
         if (msg.sender != admin) {
-            return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_ADMIN_OWNER_CHECK);
+            return
+                fail(
+                    Error.UNAUTHORIZED,
+                    FailureInfo.SET_PENDING_ADMIN_OWNER_CHECK
+                );
         }
 
         // Save current value, if any, for inclusion in log
@@ -888,7 +1168,11 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
     function _acceptAdmin() external returns (uint256) {
         // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
         if (msg.sender != pendingAdmin || msg.sender == address(0)) {
-            return fail(Error.UNAUTHORIZED, FailureInfo.ACCEPT_ADMIN_PENDING_ADMIN_CHECK);
+            return
+                fail(
+                    Error.UNAUTHORIZED,
+                    FailureInfo.ACCEPT_ADMIN_PENDING_ADMIN_CHECK
+                );
         }
 
         // Save current values for inclusion in log
@@ -912,10 +1196,17 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @dev Admin function to set a new joetroller
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setJoetroller(JoetrollerInterface newJoetroller) public returns (uint256) {
+    function _setJoetroller(JoetrollerInterface newJoetroller)
+        public
+        returns (uint256)
+    {
         // Check caller is admin
         if (msg.sender != admin) {
-            return fail(Error.UNAUTHORIZED, FailureInfo.SET_JOETROLLER_OWNER_CHECK);
+            return
+                fail(
+                    Error.UNAUTHORIZED,
+                    FailureInfo.SET_JOETROLLER_OWNER_CHECK
+                );
         }
 
         JoetrollerInterface oldJoetroller = joetroller;
@@ -936,11 +1227,19 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @dev Admin function to accrue interest and set a new reserve factor
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setReserveFactor(uint256 newReserveFactorMantissa) external nonReentrant returns (uint256) {
+    function _setReserveFactor(uint256 newReserveFactorMantissa)
+        external
+        nonReentrant
+        returns (uint256)
+    {
         uint256 error = accrueInterest();
         if (error != uint256(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted reserve factor change failed.
-            return fail(Error(error), FailureInfo.SET_RESERVE_FACTOR_ACCRUE_INTEREST_FAILED);
+            return
+                fail(
+                    Error(error),
+                    FailureInfo.SET_RESERVE_FACTOR_ACCRUE_INTEREST_FAILED
+                );
         }
         // _setReserveFactorFresh emits reserve-factor-specific logs on errors, so we don't need to.
         return _setReserveFactorFresh(newReserveFactorMantissa);
@@ -951,26 +1250,44 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @dev Admin function to set a new reserve factor
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setReserveFactorFresh(uint256 newReserveFactorMantissa) internal returns (uint256) {
+    function _setReserveFactorFresh(uint256 newReserveFactorMantissa)
+        internal
+        returns (uint256)
+    {
         // Check caller is admin
         if (msg.sender != admin) {
-            return fail(Error.UNAUTHORIZED, FailureInfo.SET_RESERVE_FACTOR_ADMIN_CHECK);
+            return
+                fail(
+                    Error.UNAUTHORIZED,
+                    FailureInfo.SET_RESERVE_FACTOR_ADMIN_CHECK
+                );
         }
 
         // Verify market's block timestamp equals current block timestamp
         if (accrualBlockTimestamp != getBlockTimestamp()) {
-            return fail(Error.MARKET_NOT_FRESH, FailureInfo.SET_RESERVE_FACTOR_FRESH_CHECK);
+            return
+                fail(
+                    Error.MARKET_NOT_FRESH,
+                    FailureInfo.SET_RESERVE_FACTOR_FRESH_CHECK
+                );
         }
 
         // Check newReserveFactor ≤ maxReserveFactor
         if (newReserveFactorMantissa > reserveFactorMaxMantissa) {
-            return fail(Error.BAD_INPUT, FailureInfo.SET_RESERVE_FACTOR_BOUNDS_CHECK);
+            return
+                fail(
+                    Error.BAD_INPUT,
+                    FailureInfo.SET_RESERVE_FACTOR_BOUNDS_CHECK
+                );
         }
 
         uint256 oldReserveFactorMantissa = reserveFactorMantissa;
         reserveFactorMantissa = newReserveFactorMantissa;
 
-        emit NewReserveFactor(oldReserveFactorMantissa, newReserveFactorMantissa);
+        emit NewReserveFactor(
+            oldReserveFactorMantissa,
+            newReserveFactorMantissa
+        );
 
         return uint256(Error.NO_ERROR);
     }
@@ -981,11 +1298,19 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @param isNative The amount is in native or not
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _addReservesInternal(uint256 addAmount, bool isNative) internal nonReentrant returns (uint256) {
+    function _addReservesInternal(uint256 addAmount, bool isNative)
+        internal
+        nonReentrant
+        returns (uint256)
+    {
         uint256 error = accrueInterest();
         if (error != uint256(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted reduce reserves failed.
-            return fail(Error(error), FailureInfo.ADD_RESERVES_ACCRUE_INTEREST_FAILED);
+            return
+                fail(
+                    Error(error),
+                    FailureInfo.ADD_RESERVES_ACCRUE_INTEREST_FAILED
+                );
         }
 
         // _addReservesFresh emits reserve-addition-specific logs on errors, so we don't need to.
@@ -1000,14 +1325,23 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @param isNative The amount is in native or not
      * @return (uint, uint) An error code (0=success, otherwise a failure (see ErrorReporter.sol for details)) and the actual amount added, net token fees
      */
-    function _addReservesFresh(uint256 addAmount, bool isNative) internal returns (uint256, uint256) {
+    function _addReservesFresh(uint256 addAmount, bool isNative)
+        internal
+        returns (uint256, uint256)
+    {
         // totalReserves + actualAddAmount
         uint256 totalReservesNew;
         uint256 actualAddAmount;
 
         // We fail gracefully unless market's block timestamp equals current block timestamp
         if (accrualBlockTimestamp != getBlockTimestamp()) {
-            return (fail(Error.MARKET_NOT_FRESH, FailureInfo.ADD_RESERVES_FRESH_CHECK), actualAddAmount);
+            return (
+                fail(
+                    Error.MARKET_NOT_FRESH,
+                    FailureInfo.ADD_RESERVES_FRESH_CHECK
+                ),
+                actualAddAmount
+            );
         }
 
         /////////////////////////
@@ -1041,11 +1375,19 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @param reduceAmount Amount of reduction to reserves
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _reduceReserves(uint256 reduceAmount) external nonReentrant returns (uint256) {
+    function _reduceReserves(uint256 reduceAmount)
+        external
+        nonReentrant
+        returns (uint256)
+    {
         uint256 error = accrueInterest();
         if (error != uint256(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted reduce reserves failed.
-            return fail(Error(error), FailureInfo.REDUCE_RESERVES_ACCRUE_INTEREST_FAILED);
+            return
+                fail(
+                    Error(error),
+                    FailureInfo.REDUCE_RESERVES_ACCRUE_INTEREST_FAILED
+                );
         }
         // _reduceReservesFresh emits reserve-reduction-specific logs on errors, so we don't need to.
         return _reduceReservesFresh(reduceAmount);
@@ -1057,28 +1399,44 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @param reduceAmount Amount of reduction to reserves
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _reduceReservesFresh(uint256 reduceAmount) internal returns (uint256) {
+    function _reduceReservesFresh(uint256 reduceAmount)
+        internal
+        returns (uint256)
+    {
         // totalReserves - reduceAmount
         uint256 totalReservesNew;
 
         // Check caller is admin
         if (msg.sender != admin) {
-            return fail(Error.UNAUTHORIZED, FailureInfo.REDUCE_RESERVES_ADMIN_CHECK);
+            return
+                fail(
+                    Error.UNAUTHORIZED,
+                    FailureInfo.REDUCE_RESERVES_ADMIN_CHECK
+                );
         }
 
         // We fail gracefully unless market's block timestamp equals current block timestamp
         if (accrualBlockTimestamp != getBlockTimestamp()) {
-            return fail(Error.MARKET_NOT_FRESH, FailureInfo.REDUCE_RESERVES_FRESH_CHECK);
+            return
+                fail(
+                    Error.MARKET_NOT_FRESH,
+                    FailureInfo.REDUCE_RESERVES_FRESH_CHECK
+                );
         }
 
         // Fail gracefully if protocol has insufficient underlying cash
         if (getCashPrior() < reduceAmount) {
-            return fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.REDUCE_RESERVES_CASH_NOT_AVAILABLE);
+            return
+                fail(
+                    Error.TOKEN_INSUFFICIENT_CASH,
+                    FailureInfo.REDUCE_RESERVES_CASH_NOT_AVAILABLE
+                );
         }
 
         // Check reduceAmount ≤ reserves[n] (totalReserves)
         if (reduceAmount > totalReserves) {
-            return fail(Error.BAD_INPUT, FailureInfo.REDUCE_RESERVES_VALIDATION);
+            return
+                fail(Error.BAD_INPUT, FailureInfo.REDUCE_RESERVES_VALIDATION);
         }
 
         /////////////////////////
@@ -1105,11 +1463,18 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @param newInterestRateModel the new interest rate model to use
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setInterestRateModel(InterestRateModel newInterestRateModel) public returns (uint256) {
+    function _setInterestRateModel(InterestRateModel newInterestRateModel)
+        public
+        returns (uint256)
+    {
         uint256 error = accrueInterest();
         if (error != uint256(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted change of interest rate model failed
-            return fail(Error(error), FailureInfo.SET_INTEREST_RATE_MODEL_ACCRUE_INTEREST_FAILED);
+            return
+                fail(
+                    Error(error),
+                    FailureInfo.SET_INTEREST_RATE_MODEL_ACCRUE_INTEREST_FAILED
+                );
         }
         // _setInterestRateModelFresh emits interest-rate-model-update-specific logs on errors, so we don't need to.
         return _setInterestRateModelFresh(newInterestRateModel);
@@ -1121,31 +1486,48 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
      * @param newInterestRateModel the new interest rate model to use
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setInterestRateModelFresh(InterestRateModel newInterestRateModel) internal returns (uint256) {
+    function _setInterestRateModelFresh(InterestRateModel newInterestRateModel)
+        internal
+        returns (uint256)
+    {
         // Used to store old model for use in the event that is emitted on success
         InterestRateModel oldInterestRateModel;
 
         // Check caller is admin
         if (msg.sender != admin) {
-            return fail(Error.UNAUTHORIZED, FailureInfo.SET_INTEREST_RATE_MODEL_OWNER_CHECK);
+            return
+                fail(
+                    Error.UNAUTHORIZED,
+                    FailureInfo.SET_INTEREST_RATE_MODEL_OWNER_CHECK
+                );
         }
 
         // We fail gracefully unless market's block timestamp equals current block timestamp
         if (accrualBlockTimestamp != getBlockTimestamp()) {
-            return fail(Error.MARKET_NOT_FRESH, FailureInfo.SET_INTEREST_RATE_MODEL_FRESH_CHECK);
+            return
+                fail(
+                    Error.MARKET_NOT_FRESH,
+                    FailureInfo.SET_INTEREST_RATE_MODEL_FRESH_CHECK
+                );
         }
 
         // Track the market's current interest rate model
         oldInterestRateModel = interestRateModel;
 
         // Ensure invoke newInterestRateModel.isInterestRateModel() returns true
-        require(newInterestRateModel.isInterestRateModel(), "marker method returned false");
+        require(
+            newInterestRateModel.isInterestRateModel(),
+            "marker method returned false"
+        );
 
         // Set the interest rate model to newInterestRateModel
         interestRateModel = newInterestRateModel;
 
         // Emit NewMarketInterestRateModel(oldInterestRateModel, newInterestRateModel)
-        emit NewMarketInterestRateModel(oldInterestRateModel, newInterestRateModel);
+        emit NewMarketInterestRateModel(
+            oldInterestRateModel,
+            newInterestRateModel
+        );
 
         return uint256(Error.NO_ERROR);
     }
@@ -1194,7 +1576,10 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
     /**
      * @notice Get the account's jToken balances
      */
-    function getJTokenBalanceInternal(address account) internal view returns (uint256);
+    function getJTokenBalanceInternal(address account)
+        internal
+        view
+        returns (uint256);
 
     /**
      * @notice User supplies assets into the market and receives jTokens in exchange
@@ -1205,16 +1590,6 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         address minter,
         bool isNative
     ) internal returns (uint256, uint256);
-
-    /**
-     * @notice User supplies assets into the market and receives jTokens in exchange
-     */
-    function depositFresh(
-        address depositor,
-        bytes32 _commitment,
-        bool isNative
-    ) internal returns (uint256, uint256);
-
 
     /**
      * @notice User redeems jTokens in exchange for the underlying asset
