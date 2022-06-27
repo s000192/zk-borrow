@@ -4,10 +4,10 @@ pragma solidity ^0.5.16;
 
 import "./JoetrollerInterface.sol";
 import "./InterestRateModel.sol";
-import "./MerkleTreeWithHistory.sol";
 import "./Interface/IVerifier.sol";
+import "./MerkleTreeWithHistory.sol";
 
-contract JTokenStorage is MerkleTreeWithHistory {
+contract JTokenStorage {
     /**
      * @dev Guard variable for re-entrancy checks
      */
@@ -63,6 +63,11 @@ contract JTokenStorage is MerkleTreeWithHistory {
      * @notice Verifier contract
      */
     IVerifier public verifier;
+
+    /**
+     * @notice Verifier contract
+     */
+    MerkleTreeWithHistory public merkleTreeWithHistory;
 
     /**
      * @notice Initial exchange rate used when minting the first JTokens (used when totalSupply = 0)

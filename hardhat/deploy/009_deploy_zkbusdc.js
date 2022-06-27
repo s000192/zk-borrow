@@ -34,6 +34,7 @@ module.exports = async function ({
   const jUsdcDelegate = await ethers.getContract("JUsdcDelegate");
   const hasher = await ethers.getContract("Hasher");
   const verifier = await ethers.getContract("Verifier");
+  const merkleTreeWithHistory = await ethers.getContract("MerkleTreeWithHistory");
 
   let usdcAddress = USDC.get(chainId);
 
@@ -70,9 +71,9 @@ module.exports = async function ({
       deployer,
       jUsdcDelegate.address,
       "0x",
-      20,
       hasher.address,
-      verifier.address
+      verifier.address,
+      merkleTreeWithHistory.address
     ],
     log: true,
     deterministicDeployment: false,
@@ -80,6 +81,9 @@ module.exports = async function ({
   });
   await deployment.receipt;
   const jUsdcDelegator = await ethers.getContract("JUsdcDelegator");
+
+  console.log("Initializing merkle tree...");
+  await merkleTreeWithHistory.initializeTree(jUsdcDelegator.address);
 
   console.log("Supporting zkbUSDC market...");
   await joetroller._supportMarket(jUsdcDelegator.address, 1, {

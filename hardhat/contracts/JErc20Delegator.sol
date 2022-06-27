@@ -11,7 +11,11 @@ import "./Interface/IVerifier.sol";
  * @notice JTokens which wrap an EIP-20 underlying and delegate to an implementation
  * @author Compound
  */
-contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterface {
+contract JErc20Delegator is
+    JTokenInterface,
+    JErc20Interface,
+    JDelegatorInterface
+{
     /**
      * @notice Construct a new money market
      * @param underlying_ The address of the underlying asset
@@ -36,9 +40,9 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
         address payable admin_,
         address implementation_,
         bytes memory becomeImplementationData,
-        uint32 levels_,
         IHasher hasher_,
-        IVerifier verifier_
+        IVerifier verifier_,
+        MerkleTreeWithHistory merkleTreeWithHistory_
     ) public {
         // Creator of the contract is admin during initialization
         admin = msg.sender;
@@ -47,7 +51,7 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
         delegateTo(
             implementation_,
             abi.encodeWithSignature(
-                "initialize(address,address,address,uint256,string,string,uint8,uint32,address,address)",
+                "initialize(address,address,address,uint256,uint256,string,string,uint8,address,address,address)",
                 underlying_,
                 joetroller_,
                 interestRateModel_,
@@ -55,9 +59,9 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
                 name_,
                 symbol_,
                 decimals_,
-                levels_,
                 hasher_,
-                verifier_
+                verifier_,
+                merkleTreeWithHistory_
             )
         );
 
@@ -79,16 +83,26 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
         bool allowResign,
         bytes memory becomeImplementationData
     ) public {
-        require(msg.sender == admin, "JErc20Delegator::_setImplementation: Caller must be admin");
+        require(
+            msg.sender == admin,
+            "JErc20Delegator::_setImplementation: Caller must be admin"
+        );
 
         if (allowResign) {
-            delegateToImplementation(abi.encodeWithSignature("_resignImplementation()"));
+            delegateToImplementation(
+                abi.encodeWithSignature("_resignImplementation()")
+            );
         }
 
         address oldImplementation = implementation;
         implementation = implementation_;
 
-        delegateToImplementation(abi.encodeWithSignature("_becomeImplementation(bytes)", becomeImplementationData));
+        delegateToImplementation(
+            abi.encodeWithSignature(
+                "_becomeImplementation(bytes)",
+                becomeImplementationData
+            )
+        );
 
         emit NewImplementation(oldImplementation, implementation);
     }
@@ -150,7 +164,10 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
      * @param repayAmount The amount to repay
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function repayBorrowBehalf(address borrower, uint256 repayAmount) external returns (uint256) {
+    function repayBorrowBehalf(address borrower, uint256 repayAmount)
+        external
+        returns (uint256)
+    {
         borrower;
         repayAmount; // Shh
         delegateAndReturn();
@@ -225,7 +242,11 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
      * @param spender The address of the account which may transfer tokens
      * @return The number of tokens allowed to be spent (-1 means infinite)
      */
-    function allowance(address owner, address spender) external view returns (uint256) {
+    function allowance(address owner, address spender)
+        external
+        view
+        returns (uint256)
+    {
         owner;
         spender; // Shh
         delegateToViewAndReturn();
@@ -311,7 +332,11 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
      * @param account The address whose balance should be calculated
      * @return The calculated balance
      */
-    function borrowBalanceStored(address account) public view returns (uint256) {
+    function borrowBalanceStored(address account)
+        public
+        view
+        returns (uint256)
+    {
         account; // Shh
         delegateToViewAndReturn();
     }
@@ -378,7 +403,10 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
      * @param newPendingAdmin New pending admin.
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setPendingAdmin(address payable newPendingAdmin) external returns (uint256) {
+    function _setPendingAdmin(address payable newPendingAdmin)
+        external
+        returns (uint256)
+    {
         newPendingAdmin; // Shh
         delegateAndReturn();
     }
@@ -388,7 +416,10 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
      * @dev Admin function to set a new joetroller
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setJoetroller(JoetrollerInterface newJoetroller) public returns (uint256) {
+    function _setJoetroller(JoetrollerInterface newJoetroller)
+        public
+        returns (uint256)
+    {
         newJoetroller; // Shh
         delegateAndReturn();
     }
@@ -398,7 +429,10 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
      * @dev Admin function to accrue interest and set a new reserve factor
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setReserveFactor(uint256 newReserveFactorMantissa) external returns (uint256) {
+    function _setReserveFactor(uint256 newReserveFactorMantissa)
+        external
+        returns (uint256)
+    {
         newReserveFactorMantissa; // Shh
         delegateAndReturn();
     }
@@ -438,7 +472,10 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
      * @param newInterestRateModel the new interest rate model to use
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setInterestRateModel(InterestRateModel newInterestRateModel) public returns (uint256) {
+    function _setInterestRateModel(InterestRateModel newInterestRateModel)
+        public
+        returns (uint256)
+    {
         newInterestRateModel; // Shh
         delegateAndReturn();
     }
@@ -450,7 +487,10 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
      * @param data The raw data to delegatecall
      * @return The returned bytes from the delegatecall
      */
-    function delegateTo(address callee, bytes memory data) internal returns (bytes memory) {
+    function delegateTo(address callee, bytes memory data)
+        internal
+        returns (bytes memory)
+    {
         (bool success, bytes memory returnData) = callee.delegatecall(data);
         assembly {
             if eq(success, 0) {
@@ -466,7 +506,10 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
      * @param data The raw data to delegatecall
      * @return The returned bytes from the delegatecall
      */
-    function delegateToImplementation(bytes memory data) public returns (bytes memory) {
+    function delegateToImplementation(bytes memory data)
+        public
+        returns (bytes memory)
+    {
         return delegateTo(implementation, data);
     }
 
@@ -477,7 +520,11 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
      * @param data The raw data to delegatecall
      * @return The returned bytes from the delegatecall
      */
-    function delegateToViewImplementation(bytes memory data) public view returns (bytes memory) {
+    function delegateToViewImplementation(bytes memory data)
+        public
+        view
+        returns (bytes memory)
+    {
         (bool success, bytes memory returnData) = address(this).staticcall(
             abi.encodeWithSignature("delegateToImplementation(bytes)", data)
         );
@@ -530,7 +577,10 @@ contract JErc20Delegator is JTokenInterface, JErc20Interface, JDelegatorInterfac
      * @dev It returns to the external caller whatever the implementation returns or forwards reverts
      */
     function() external payable {
-        require(msg.value == 0, "JErc20Delegator:fallback: cannot send value to fallback");
+        require(
+            msg.value == 0,
+            "JErc20Delegator:fallback: cannot send value to fallback"
+        );
 
         // delegate all other functions to current implementation
         delegateAndReturn();

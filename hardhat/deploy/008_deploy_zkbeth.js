@@ -1,4 +1,5 @@
 const { BigNumber } = require("ethers");
+const { ethers } = require('hardhat');
 
 const WETH = new Map();
 WETH.set("4", "0xc778417e063141139fce010982780140aa0cd5ab");
@@ -35,6 +36,7 @@ module.exports = async function ({
   const jAvaxDelegate = await ethers.getContract("JAvaxDelegate");
   const hasher = await ethers.getContract("Hasher");
   const verifier = await ethers.getContract("Verifier");
+  const merkleTreeWithHistory = await ethers.getContract("MerkleTreeWithHistory");
 
   let wethAddress = WETH.get(chainId);
 
@@ -71,9 +73,9 @@ module.exports = async function ({
       deployer,
       jAvaxDelegate.address,
       "0x",
-      20,
       hasher.address,
-      verifier.address
+      verifier.address,
+      merkleTreeWithHistory.address
     ],
     log: true,
     deterministicDeployment: false,
@@ -81,6 +83,9 @@ module.exports = async function ({
   });
   await deployment.receipt;
   const jAvaxDelegator = await ethers.getContract("JAvaxDelegator");
+
+  console.log("Initializing merkle tree for zkbETH...");
+  await merkleTreeWithHistory.initializeTree(jAvaxDelegator.address);
 
   console.log("Supporting zkbETH market...");
   await joetroller._supportMarket(jAvaxDelegator.address, 2, {

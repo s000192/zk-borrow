@@ -35,9 +35,9 @@ contract JCollateralCapErc20 is
         string memory name_,
         string memory symbol_,
         uint8 decimals_,
-        uint32 levels_,
         IHasher hasher_,
-        IVerifier verifier_
+        IVerifier verifier_,
+        MerkleTreeWithHistory merkleTreeWithHistory_
     ) public {
         // JToken initialize does the bulk of the work
         super.initialize(
@@ -48,9 +48,9 @@ contract JCollateralCapErc20 is
             name_,
             symbol_,
             decimals_,
-            levels_,
             hasher_,
-            verifier_
+            verifier_,
+            merkleTreeWithHistory_
         );
 
         // Set underlying and sanity check it
@@ -76,7 +76,10 @@ contract JCollateralCapErc20 is
 
         require(!commitments[_commitment], "The commitment has been submitted");
 
-        uint32 insertedIndex = _insert(_commitment);
+        uint32 insertedIndex = merkleTreeWithHistory._insert(
+            _commitment,
+            address(this)
+        );
         commitments[_commitment] = true;
 
         emit Deposit(_commitment, insertedIndex, getBlockTimestamp());

@@ -12,6 +12,7 @@ import "./InterestRateModel.sol";
 import "./Verifier.sol";
 import "./Interface/IHasher.sol";
 import "./Interface/IVerifier.sol";
+import "./MerkleTreeWithHistory.sol";
 
 /**
  * @title Compound's JToken Contract
@@ -36,9 +37,9 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         string memory name_,
         string memory symbol_,
         uint8 decimals_,
-        uint32 levels_,
         IHasher hasher_,
-        IVerifier verifier_
+        IVerifier verifier_,
+        MerkleTreeWithHistory merkleTreeWithHistory_
     ) public {
         require(msg.sender == admin, "only admin may initialize the market");
         require(
@@ -73,8 +74,7 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         symbol = symbol_;
         decimals = decimals_;
         verifier = verifier_;
-
-        initializeTree(levels_, hasher_);
+        merkleTreeWithHistory = merkleTreeWithHistory_;
 
         // The counter starts true to prevent changing it from zero to non-zero (i.e. smaller cost/refund)
         _notEntered = true;
@@ -520,7 +520,10 @@ contract JToken is JTokenInterface, Exponential, TokenErrorReporter {
         address minter,
         bool isNative
     ) internal nonReentrant returns (uint256, uint256) {
-        require(isKnownRoot(_root), "Cannot find your merkle root");
+        require(
+            merkleTreeWithHistory.isKnownRoot(_root, address(this)),
+            "Cannot find your merkle root"
+        );
         require(
             verifier.verifyProof(
                 a,

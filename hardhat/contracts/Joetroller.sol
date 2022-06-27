@@ -4,6 +4,7 @@ pragma solidity ^0.5.16;
 pragma experimental ABIEncoderV2;
 
 import "./JToken.sol";
+import "./JTokenInterfaces.sol";
 import "./EIP20Interface.sol";
 import "./ErrorReporter.sol";
 import "./Exponential.sol";

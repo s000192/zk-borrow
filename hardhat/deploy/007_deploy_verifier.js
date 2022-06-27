@@ -4,7 +4,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   await deploy('Verifier', {
     from: deployer,
-    log: true
+    log: true,
+    deterministicDeployment: false
   });
 };
 module.exports.tags = ['Verifier'];

@@ -41,9 +41,9 @@ contract JCollateralCapErc20Delegator is
         address payable admin_,
         address implementation_,
         bytes memory becomeImplementationData,
-        uint32 levels_,
         IHasher hasher_,
-        IVerifier verifier_
+        IVerifier verifier_,
+        MerkleTreeWithHistory merkleTreeWithHistory_
     ) public {
         // Creator of the contract is admin during initialization
         admin = msg.sender;
@@ -52,7 +52,7 @@ contract JCollateralCapErc20Delegator is
         delegateTo(
             implementation_,
             abi.encodeWithSignature(
-                "initialize(address,address,address,uint256,uint256,string,string,uint8,uint32,address,address)",
+                "initialize(address,address,address,uint256,uint256,string,string,uint8,address,address,address)",
                 underlying_,
                 joetroller_,
                 interestRateModel_,
@@ -61,9 +61,9 @@ contract JCollateralCapErc20Delegator is
                 name_,
                 symbol_,
                 decimals_,
-                levels_,
                 hasher_,
-                verifier_
+                verifier_,
+                merkleTreeWithHistory_
             )
         );
 
