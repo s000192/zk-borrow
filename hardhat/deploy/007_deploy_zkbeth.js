@@ -1,3 +1,5 @@
+const { BigNumber } = require("ethers");
+
 const WETH = new Map();
 WETH.set("4", "0xc778417e063141139fce010982780140aa0cd5ab");
 WETH.set("1337", "0xc778417e063141139fce010982780140aa0cd5ab");
@@ -34,10 +36,31 @@ module.exports = async function ({
   const hasher = await ethers.getContract("Hasher");
   const verifier = await ethers.getContract("Verifier");
 
+  let wethAddress = WETH.get(chainId);
+
+  // TODO: Adding this temporarily for testing.
+  if (chainId === '1337' || chainId === '1666900000') {
+    const wethDeployment = await deploy("WETH", {
+      from: deployer,
+      args: [
+        "Wrapped ETH",
+        "WETH",
+        18
+      ],
+      log: true,
+      deterministicDeployment: false,
+      contract: "ERC20",
+    });
+    wethAddress = wethDeployment.address;
+
+    const weth = await ethers.getContract("WETH");
+    await weth.mint(deployer, ethers.utils.parseUnits("100", 18));
+  }
+
   const deployment = await deploy("JAvaxDelegator", {
     from: deployer,
     args: [
-      WETH.get(chainId),
+      wethAddress,
       joetroller.address,
       interestRateModel.address,
       ethers.utils.parseUnits("2", 26).toString(),
@@ -64,12 +87,22 @@ module.exports = async function ({
     gasLimit: 2000000,
   });
 
-  const priceOracle = await ethers.getContract("PriceOracleProxyUSD");
-  console.log("Setting price feed source for zkbETH");
-  await priceOracle._setAggregators(
-    [jAvaxDelegator.address],
-    [ETH_PRICE_FEED.get(chainId)]
-  );
+  // TODO: Adding this temporarily for testing.
+  if (chainId === '1337' || chainId === '1666900000') {
+    const priceOracle = await ethers.getContract("MockOracle");
+    console.log("Setting price feed source for zkbETH");
+    await priceOracle._setUnderlyingPrice(
+      jAvaxDelegator.address,
+      BigNumber.from("123432000000")
+    );
+  } else {
+    const priceOracle = await ethers.getContract("PriceOracleProxyUSD");
+    console.log("Setting price feed source for zkbETH");
+    await priceOracle._setAggregators(
+      [jAvaxDelegator.address],
+      [ETH_PRICE_FEED.get(chainId)]
+    );
+  }
 
   const collateralFactor = "0.75";
   console.log("Setting collateral factor ", collateralFactor);

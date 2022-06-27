@@ -11,7 +11,11 @@ import "./Interface/IVerifier.sol";
  * @notice JTokens which wrap an EIP-20 underlying and delegate to an implementation
  * @author Cream
  */
-contract JCollateralCapErc20Delegator is JTokenInterface, JCollateralCapErc20Interface, JDelegatorInterface {
+contract JCollateralCapErc20Delegator is
+    JTokenInterface,
+    JCollateralCapErc20Interface,
+    JDelegatorInterface
+{
     /**
      * @notice Construct a new money market
      * @param underlying_ The address of the underlying asset
@@ -81,16 +85,26 @@ contract JCollateralCapErc20Delegator is JTokenInterface, JCollateralCapErc20Int
         bool allowResign,
         bytes memory becomeImplementationData
     ) public {
-        require(msg.sender == admin, "CErc20Delegator::_setImplementation: Caller must be admin");
+        require(
+            msg.sender == admin,
+            "CErc20Delegator::_setImplementation: Caller must be admin"
+        );
 
         if (allowResign) {
-            delegateToImplementation(abi.encodeWithSignature("_resignImplementation()"));
+            delegateToImplementation(
+                abi.encodeWithSignature("_resignImplementation()")
+            );
         }
 
         address oldImplementation = implementation;
         implementation = implementation_;
 
-        delegateToImplementation(abi.encodeWithSignature("_becomeImplementation(bytes)", becomeImplementationData));
+        delegateToImplementation(
+            abi.encodeWithSignature(
+                "_becomeImplementation(bytes)",
+                becomeImplementationData
+            )
+        );
 
         emit NewImplementation(oldImplementation, implementation);
     }
@@ -116,9 +130,9 @@ contract JCollateralCapErc20Delegator is JTokenInterface, JCollateralCapErc20Int
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
     function mint(
-        uint[2] calldata a,
-        uint[2][2] calldata b,
-        uint[2] calldata c,
+        uint256[2] calldata a,
+        uint256[2][2] calldata b,
+        uint256[2] calldata c,
         bytes32 _root,
         bytes32 _nullifierHash,
         address minter
@@ -180,7 +194,10 @@ contract JCollateralCapErc20Delegator is JTokenInterface, JCollateralCapErc20Int
      * @param repayAmount The amount to repay
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function repayBorrowBehalf(address borrower, uint256 repayAmount) external returns (uint256) {
+    function repayBorrowBehalf(address borrower, uint256 repayAmount)
+        external
+        returns (uint256)
+    {
         borrower;
         repayAmount; // Shh
         delegateAndReturn();
@@ -257,26 +274,26 @@ contract JCollateralCapErc20Delegator is JTokenInterface, JCollateralCapErc20Int
         delegateAndReturn();
     }
 
-    /**
-     * @notice Flash loan funds to a given account.
-     * @param receiver The receiver address for the funds
-     * @param initiator flash loan initiator
-     * @param amount The amount of the funds to be loaned
-     * @param data The other data
-     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-     */
-    function flashLoan(
-        ERC3156FlashBorrowerInterface receiver,
-        address initiator,
-        uint256 amount,
-        bytes calldata data
-    ) external returns (bool) {
-        receiver;
-        initiator;
-        amount;
-        data; // Shh
-        delegateAndReturn();
-    }
+    // /**
+    //  * @notice Flash loan funds to a given account.
+    //  * @param receiver The receiver address for the funds
+    //  * @param initiator flash loan initiator
+    //  * @param amount The amount of the funds to be loaned
+    //  * @param data The other data
+    //  * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+    //  */
+    // function flashLoan(
+    //     ERC3156FlashBorrowerInterface receiver,
+    //     address initiator,
+    //     uint256 amount,
+    //     bytes calldata data
+    // ) external returns (bool) {
+    //     receiver;
+    //     initiator;
+    //     amount;
+    //     data; // Shh
+    //     delegateAndReturn();
+    // }
 
     /**
      * @notice Register account collateral tokens if there is space.
@@ -305,7 +322,11 @@ contract JCollateralCapErc20Delegator is JTokenInterface, JCollateralCapErc20Int
      * @param spender The address of the account which may transfer tokens
      * @return The number of tokens allowed to be spent (-1 means infinite)
      */
-    function allowance(address owner, address spender) external view returns (uint256) {
+    function allowance(address owner, address spender)
+        external
+        view
+        returns (uint256)
+    {
         owner;
         spender; // Shh
         delegateToViewAndReturn();
@@ -391,7 +412,11 @@ contract JCollateralCapErc20Delegator is JTokenInterface, JCollateralCapErc20Int
      * @param account The address whose balance should be calculated
      * @return The calculated balance
      */
-    function borrowBalanceStored(address account) public view returns (uint256) {
+    function borrowBalanceStored(address account)
+        public
+        view
+        returns (uint256)
+    {
         account; // Shh
         delegateToViewAndReturn();
     }
@@ -458,7 +483,10 @@ contract JCollateralCapErc20Delegator is JTokenInterface, JCollateralCapErc20Int
      * @param newPendingAdmin New pending admin.
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setPendingAdmin(address payable newPendingAdmin) external returns (uint256) {
+    function _setPendingAdmin(address payable newPendingAdmin)
+        external
+        returns (uint256)
+    {
         newPendingAdmin; // Shh
         delegateAndReturn();
     }
@@ -468,7 +496,10 @@ contract JCollateralCapErc20Delegator is JTokenInterface, JCollateralCapErc20Int
      * @dev Admin function to set a new joetroller
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setJoetroller(JoetrollerInterface newJoetroller) public returns (uint256) {
+    function _setJoetroller(JoetrollerInterface newJoetroller)
+        public
+        returns (uint256)
+    {
         newJoetroller; // Shh
         delegateAndReturn();
     }
@@ -478,7 +509,10 @@ contract JCollateralCapErc20Delegator is JTokenInterface, JCollateralCapErc20Int
      * @dev Admin function to accrue interest and set a new reserve factor
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setReserveFactor(uint256 newReserveFactorMantissa) external returns (uint256) {
+    function _setReserveFactor(uint256 newReserveFactorMantissa)
+        external
+        returns (uint256)
+    {
         newReserveFactorMantissa; // Shh
         delegateAndReturn();
     }
@@ -518,7 +552,10 @@ contract JCollateralCapErc20Delegator is JTokenInterface, JCollateralCapErc20Int
      * @param newInterestRateModel the new interest rate model to use
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setInterestRateModel(InterestRateModel newInterestRateModel) public returns (uint256) {
+    function _setInterestRateModel(InterestRateModel newInterestRateModel)
+        public
+        returns (uint256)
+    {
         newInterestRateModel; // Shh
         delegateAndReturn();
     }
@@ -539,7 +576,10 @@ contract JCollateralCapErc20Delegator is JTokenInterface, JCollateralCapErc20Int
      * @param data The raw data to delegatecall
      * @return The returned bytes from the delegatecall
      */
-    function delegateTo(address callee, bytes memory data) internal returns (bytes memory) {
+    function delegateTo(address callee, bytes memory data)
+        internal
+        returns (bytes memory)
+    {
         (bool success, bytes memory returnData) = callee.delegatecall(data);
         assembly {
             if eq(success, 0) {
@@ -555,7 +595,10 @@ contract JCollateralCapErc20Delegator is JTokenInterface, JCollateralCapErc20Int
      * @param data The raw data to delegatecall
      * @return The returned bytes from the delegatecall
      */
-    function delegateToImplementation(bytes memory data) public returns (bytes memory) {
+    function delegateToImplementation(bytes memory data)
+        public
+        returns (bytes memory)
+    {
         return delegateTo(implementation, data);
     }
 
@@ -566,7 +609,11 @@ contract JCollateralCapErc20Delegator is JTokenInterface, JCollateralCapErc20Int
      * @param data The raw data to delegatecall
      * @return The returned bytes from the delegatecall
      */
-    function delegateToViewImplementation(bytes memory data) public view returns (bytes memory) {
+    function delegateToViewImplementation(bytes memory data)
+        public
+        view
+        returns (bytes memory)
+    {
         (bool success, bytes memory returnData) = address(this).staticcall(
             abi.encodeWithSignature("delegateToImplementation(bytes)", data)
         );
@@ -619,7 +666,10 @@ contract JCollateralCapErc20Delegator is JTokenInterface, JCollateralCapErc20Int
      * @dev It returns to the external caller whatever the implementation returns or forwards reverts
      */
     function() external payable {
-        require(msg.value == 0, "CErc20Delegator:fallback: cannot send value to fallback");
+        require(
+            msg.value == 0,
+            "CErc20Delegator:fallback: cannot send value to fallback"
+        );
 
         // delegate all other functions to current implementation
         delegateAndReturn();

@@ -11,7 +11,9 @@ contract JoetrollerInterface {
 
     /*** Assets You Are In ***/
 
-    function enterMarkets(address[] calldata jTokens) external returns (uint256[] memory);
+    function enterMarkets(address[] calldata jTokens)
+        external
+        returns (uint256[] memory);
 
     function exitMarket(address jToken) external returns (uint256);
 
@@ -127,14 +129,20 @@ contract JoetrollerInterface {
 }
 
 interface JoetrollerInterfaceExtension {
-    function checkMembership(address account, JToken jToken) external view returns (bool);
+    function checkMembership(address account, JToken jToken)
+        external
+        view
+        returns (bool);
 
-    function updateJTokenVersion(address jToken, JoetrollerV1Storage.Version version) external;
-
-    function flashloanAllowed(
+    function updateJTokenVersion(
         address jToken,
-        address receiver,
-        uint256 amount,
-        bytes calldata params
-    ) external view returns (bool);
+        JoetrollerV1Storage.Version version
+    ) external;
+
+    // function flashloanAllowed(
+    //     address jToken,
+    //     address receiver,
+    //     uint256 amount,
+    //     bytes calldata params
+    // ) external view returns (bool);
 }

@@ -106,8 +106,8 @@ contract JoetrollerV1Storage is UnitrollerAdminStorage {
     // @notice creditLimits allowed specific protocols to borrow and repay without collateral.
     mapping(address => uint256) public creditLimits;
 
-    // @notice flashloanGuardianPaused can pause flash loan as a safety mechanism.
-    mapping(address => bool) public flashloanGuardianPaused;
+    // // @notice flashloanGuardianPaused can pause flash loan as a safety mechanism.
+    // mapping(address => bool) public flashloanGuardianPaused;
 
     // @notice rewardDistributor The module that handles reward distribution.
     address payable public rewardDistributor;

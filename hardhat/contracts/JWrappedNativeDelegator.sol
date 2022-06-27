@@ -11,7 +11,11 @@ import "./Interface/IVerifier.sol";
  * @notice JTokens which wrap an EIP-20 underlying and delegate to an implementation
  * @author Compound
  */
-contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JDelegatorInterface {
+contract JWrappedNativeDelegator is
+    JTokenInterface,
+    JWrappedNativeInterface,
+    JDelegatorInterface
+{
     /**
      * @notice Construct a new money market
      * @param underlying_ The address of the underlying asset
@@ -80,16 +84,26 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
         bool allowResign,
         bytes memory becomeImplementationData
     ) public {
-        require(msg.sender == admin, "JWrappedNativeDelegator::_setImplementation: Caller must be admin");
+        require(
+            msg.sender == admin,
+            "JWrappedNativeDelegator::_setImplementation: Caller must be admin"
+        );
 
         if (allowResign) {
-            delegateToImplementation(abi.encodeWithSignature("_resignImplementation()"));
+            delegateToImplementation(
+                abi.encodeWithSignature("_resignImplementation()")
+            );
         }
 
         address oldImplementation = implementation;
         implementation = implementation_;
 
-        delegateToImplementation(abi.encodeWithSignature("_becomeImplementation(bytes)", becomeImplementationData));
+        delegateToImplementation(
+            abi.encodeWithSignature(
+                "_becomeImplementation(bytes)",
+                becomeImplementationData
+            )
+        );
 
         emit NewImplementation(oldImplementation, implementation);
     }
@@ -107,7 +121,11 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
      * @notice Sender supplies assets into the market
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function depositNative(bytes32 _commitment) external payable returns (uint256) {
+    function depositNative(bytes32 _commitment)
+        external
+        payable
+        returns (uint256)
+    {
         _commitment; // Shh
         delegateAndReturn();
     }
@@ -124,9 +142,9 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
     function mint(
-        uint[2] calldata a,
-        uint[2][2] calldata b,
-        uint[2] calldata c,
+        uint256[2] calldata a,
+        uint256[2][2] calldata b,
+        uint256[2] calldata c,
         bytes32 _root,
         bytes32 _nullifierHash,
         address minter
@@ -152,9 +170,9 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
     function mintNative(
-        uint[2] calldata a,
-        uint[2][2] calldata b,
-        uint[2] calldata c,
+        uint256[2] calldata a,
+        uint256[2][2] calldata b,
+        uint256[2] calldata c,
         bytes32 _root,
         bytes32 _nullifierHash,
         address minter
@@ -207,7 +225,10 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
      * @param redeemAmount The amount of underlying to redeem
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function redeemUnderlyingNative(uint256 redeemAmount) external returns (uint256) {
+    function redeemUnderlyingNative(uint256 redeemAmount)
+        external
+        returns (uint256)
+    {
         redeemAmount; // Shh
         delegateAndReturn();
     }
@@ -256,7 +277,10 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
      * @param repayAmount The amount to repay
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function repayBorrowBehalf(address borrower, uint256 repayAmount) external returns (uint256) {
+    function repayBorrowBehalf(address borrower, uint256 repayAmount)
+        external
+        returns (uint256)
+    {
         borrower;
         repayAmount; // Shh
         delegateAndReturn();
@@ -267,7 +291,11 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
      * @param borrower the account with the debt being payed off
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function repayBorrowBehalfNative(address borrower) external payable returns (uint256) {
+    function repayBorrowBehalfNative(address borrower)
+        external
+        payable
+        returns (uint256)
+    {
         borrower; // Shh
         delegateAndReturn();
     }
@@ -298,35 +326,34 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
      * @param jTokenCollateral The market in which to seize collateral from the borrower
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function liquidateBorrowNative(address borrower, JTokenInterface jTokenCollateral)
-        external
-        payable
-        returns (uint256)
-    {
+    function liquidateBorrowNative(
+        address borrower,
+        JTokenInterface jTokenCollateral
+    ) external payable returns (uint256) {
         borrower;
         jTokenCollateral; // Shh
         delegateAndReturn();
     }
 
-    /**
-     * @notice Flash loan funds to a given account.
-     * @param receiver The receiver address for the funds
-     * @param amount The amount of the funds to be loaned
-     * @param data The other data
-     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-     */
+    // /**
+    //  * @notice Flash loan funds to a given account.
+    //  * @param receiver The receiver address for the funds
+    //  * @param amount The amount of the funds to be loaned
+    //  * @param data The other data
+    //  * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+    //  */
 
-    function flashLoan(
-        ERC3156FlashBorrowerInterface receiver,
-        address initiator,
-        uint256 amount,
-        bytes calldata data
-    ) external returns (bool) {
-        receiver;
-        amount;
-        data; // Shh
-        delegateAndReturn();
-    }
+    // function flashLoan(
+    //     ERC3156FlashBorrowerInterface receiver,
+    //     address initiator,
+    //     uint256 amount,
+    //     bytes calldata data
+    // ) external returns (bool) {
+    //     receiver;
+    //     amount;
+    //     data; // Shh
+    //     delegateAndReturn();
+    // }
 
     /**
      * @notice Transfer `amount` tokens from `msg.sender` to `dst`
@@ -378,7 +405,11 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
      * @param spender The address of the account which may transfer tokens
      * @return The number of tokens allowed to be spent (-1 means infinite)
      */
-    function allowance(address owner, address spender) external view returns (uint256) {
+    function allowance(address owner, address spender)
+        external
+        view
+        returns (uint256)
+    {
         owner;
         spender; // Shh
         delegateToViewAndReturn();
@@ -464,7 +495,11 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
      * @param account The address whose balance should be calculated
      * @return The calculated balance
      */
-    function borrowBalanceStored(address account) public view returns (uint256) {
+    function borrowBalanceStored(address account)
+        public
+        view
+        returns (uint256)
+    {
         account; // Shh
         delegateToViewAndReturn();
     }
@@ -531,7 +566,10 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
      * @param newPendingAdmin New pending admin.
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setPendingAdmin(address payable newPendingAdmin) external returns (uint256) {
+    function _setPendingAdmin(address payable newPendingAdmin)
+        external
+        returns (uint256)
+    {
         newPendingAdmin; // Shh
         delegateAndReturn();
     }
@@ -541,7 +579,10 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
      * @dev Admin function to set a new joetroller
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setJoetroller(JoetrollerInterface newJoetroller) public returns (uint256) {
+    function _setJoetroller(JoetrollerInterface newJoetroller)
+        public
+        returns (uint256)
+    {
         newJoetroller; // Shh
         delegateAndReturn();
     }
@@ -551,7 +592,10 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
      * @dev Admin function to accrue interest and set a new reserve factor
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setReserveFactor(uint256 newReserveFactorMantissa) external returns (uint256) {
+    function _setReserveFactor(uint256 newReserveFactorMantissa)
+        external
+        returns (uint256)
+    {
         newReserveFactorMantissa; // Shh
         delegateAndReturn();
     }
@@ -599,7 +643,10 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
      * @param newInterestRateModel the new interest rate model to use
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setInterestRateModel(InterestRateModel newInterestRateModel) public returns (uint256) {
+    function _setInterestRateModel(InterestRateModel newInterestRateModel)
+        public
+        returns (uint256)
+    {
         newInterestRateModel; // Shh
         delegateAndReturn();
     }
@@ -611,7 +658,10 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
      * @param data The raw data to delegatecall
      * @return The returned bytes from the delegatecall
      */
-    function delegateTo(address callee, bytes memory data) internal returns (bytes memory) {
+    function delegateTo(address callee, bytes memory data)
+        internal
+        returns (bytes memory)
+    {
         (bool success, bytes memory returnData) = callee.delegatecall(data);
         assembly {
             if eq(success, 0) {
@@ -627,7 +677,10 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
      * @param data The raw data to delegatecall
      * @return The returned bytes from the delegatecall
      */
-    function delegateToImplementation(bytes memory data) public returns (bytes memory) {
+    function delegateToImplementation(bytes memory data)
+        public
+        returns (bytes memory)
+    {
         return delegateTo(implementation, data);
     }
 
@@ -638,7 +691,11 @@ contract JWrappedNativeDelegator is JTokenInterface, JWrappedNativeInterface, JD
      * @param data The raw data to delegatecall
      * @return The returned bytes from the delegatecall
      */
-    function delegateToViewImplementation(bytes memory data) public view returns (bytes memory) {
+    function delegateToViewImplementation(bytes memory data)
+        public
+        view
+        returns (bytes memory)
+    {
         (bool success, bytes memory returnData) = address(this).staticcall(
             abi.encodeWithSignature("delegateToImplementation(bytes)", data)
         );

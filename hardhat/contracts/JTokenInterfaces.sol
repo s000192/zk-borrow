@@ -4,7 +4,6 @@ pragma solidity ^0.5.16;
 
 import "./JoetrollerInterface.sol";
 import "./InterestRateModel.sol";
-import "./ERC3156FlashBorrowerInterface.sol";
 import "./MerkleTreeWithHistory.sol";
 import "./Interface/IVerifier.sol";
 
@@ -196,7 +195,12 @@ contract JTokenInterface is JTokenStorage {
     /**
      * @notice Event emitted when interest is accrued
      */
-    event AccrueInterest(uint256 cashPrior, uint256 interestAccumulated, uint256 borrowIndex, uint256 totalBorrows);
+    event AccrueInterest(
+        uint256 cashPrior,
+        uint256 interestAccumulated,
+        uint256 borrowIndex,
+        uint256 totalBorrows
+    );
 
     /**
      * @notice Event emitted when tokens are deposited
@@ -206,7 +210,12 @@ contract JTokenInterface is JTokenStorage {
     /**
      * @notice Event emitted when tokens are minted
      */
-    event Mint(address minter, bytes32 nulliferHash, uint256 mintAmount, uint256 mintTokens);
+    event Mint(
+        address minter,
+        bytes32 nulliferHash,
+        uint256 mintAmount,
+        uint256 mintTokens
+    );
 
     /**
      * @notice Event emitted when tokens are redeemed
@@ -216,7 +225,12 @@ contract JTokenInterface is JTokenStorage {
     /**
      * @notice Event emitted when underlying is borrowed
      */
-    event Borrow(address borrower, uint256 borrowAmount, uint256 accountBorrows, uint256 totalBorrows);
+    event Borrow(
+        address borrower,
+        uint256 borrowAmount,
+        uint256 accountBorrows,
+        uint256 totalBorrows
+    );
 
     /**
      * @notice Event emitted when a borrow is repaid
@@ -255,27 +269,44 @@ contract JTokenInterface is JTokenStorage {
     /**
      * @notice Event emitted when joetroller is changed
      */
-    event NewJoetroller(JoetrollerInterface oldJoetroller, JoetrollerInterface newJoetroller);
+    event NewJoetroller(
+        JoetrollerInterface oldJoetroller,
+        JoetrollerInterface newJoetroller
+    );
 
     /**
      * @notice Event emitted when interestRateModel is changed
      */
-    event NewMarketInterestRateModel(InterestRateModel oldInterestRateModel, InterestRateModel newInterestRateModel);
+    event NewMarketInterestRateModel(
+        InterestRateModel oldInterestRateModel,
+        InterestRateModel newInterestRateModel
+    );
 
     /**
      * @notice Event emitted when the reserve factor is changed
      */
-    event NewReserveFactor(uint256 oldReserveFactorMantissa, uint256 newReserveFactorMantissa);
+    event NewReserveFactor(
+        uint256 oldReserveFactorMantissa,
+        uint256 newReserveFactorMantissa
+    );
 
     /**
      * @notice Event emitted when the reserves are added
      */
-    event ReservesAdded(address benefactor, uint256 addAmount, uint256 newTotalReserves);
+    event ReservesAdded(
+        address benefactor,
+        uint256 addAmount,
+        uint256 newTotalReserves
+    );
 
     /**
      * @notice Event emitted when the reserves are reduced
      */
-    event ReservesReduced(address admin, uint256 reduceAmount, uint256 newTotalReserves);
+    event ReservesReduced(
+        address admin,
+        uint256 reduceAmount,
+        uint256 newTotalReserves
+    );
 
     /**
      * @notice EIP20 Transfer event
@@ -285,7 +316,11 @@ contract JTokenInterface is JTokenStorage {
     /**
      * @notice EIP20 Approval event
      */
-    event Approval(address indexed owner, address indexed spender, uint256 amount);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 amount
+    );
 
     /**
      * @notice Failure event
@@ -304,7 +339,10 @@ contract JTokenInterface is JTokenStorage {
 
     function approve(address spender, uint256 amount) external returns (bool);
 
-    function allowance(address owner, address spender) external view returns (uint256);
+    function allowance(address owner, address spender)
+        external
+        view
+        returns (uint256);
 
     function balanceOf(address owner) external view returns (uint256);
 
@@ -346,27 +384,35 @@ contract JTokenInterface is JTokenStorage {
 
     /*** Admin Functions ***/
 
-    function _setPendingAdmin(address payable newPendingAdmin) external returns (uint256);
+    function _setPendingAdmin(address payable newPendingAdmin)
+        external
+        returns (uint256);
 
     function _acceptAdmin() external returns (uint256);
 
-    function _setJoetroller(JoetrollerInterface newJoetroller) public returns (uint256);
+    function _setJoetroller(JoetrollerInterface newJoetroller)
+        public
+        returns (uint256);
 
-    function _setReserveFactor(uint256 newReserveFactorMantissa) external returns (uint256);
+    function _setReserveFactor(uint256 newReserveFactorMantissa)
+        external
+        returns (uint256);
 
     function _reduceReserves(uint256 reduceAmount) external returns (uint256);
 
-    function _setInterestRateModel(InterestRateModel newInterestRateModel) public returns (uint256);
+    function _setInterestRateModel(InterestRateModel newInterestRateModel)
+        public
+        returns (uint256);
 }
 
 contract JErc20Interface is JErc20Storage {
     /*** User Interface ***/
-    function deposit(bytes32 _commitment) external returns(uint256);
+    function deposit(bytes32 _commitment) external returns (uint256);
 
     function mint(
-        uint[2] calldata a,
-        uint[2][2] calldata b,
-        uint[2] calldata c,
+        uint256[2] calldata a,
+        uint256[2][2] calldata b,
+        uint256[2] calldata c,
         bytes32 _root,
         bytes32 _nullifierHash,
         address _recipient
@@ -380,7 +426,9 @@ contract JErc20Interface is JErc20Storage {
 
     function repayBorrow(uint256 repayAmount) external returns (uint256);
 
-    function repayBorrowBehalf(address borrower, uint256 repayAmount) external returns (uint256);
+    function repayBorrowBehalf(address borrower, uint256 repayAmount)
+        external
+        returns (uint256);
 
     function liquidateBorrow(
         address borrower,
@@ -399,18 +447,21 @@ contract JWrappedNativeInterface is JErc20Interface {
 
     /*** Market Events ***/
 
-    /**
-     * @notice Event emitted when a flashloan occured
-     */
-    event Flashloan(address indexed receiver, uint256 amount, uint256 totalFee, uint256 reservesFee);
+    // /**
+    //  * @notice Event emitted when a flashloan occured
+    //  */
+    // event Flashloan(address indexed receiver, uint256 amount, uint256 totalFee, uint256 reservesFee);
 
     /*** User Interface ***/
-    function depositNative(bytes32 _commitment) payable external returns (uint256);
+    function depositNative(bytes32 _commitment)
+        external
+        payable
+        returns (uint256);
 
     function mintNative(
-        uint[2] calldata a,
-        uint[2][2] calldata b,
-        uint[2] calldata c,
+        uint256[2] calldata a,
+        uint256[2][2] calldata b,
+        uint256[2] calldata c,
         bytes32 _root,
         bytes32 _nullifierHash,
         address minter
@@ -418,25 +469,30 @@ contract JWrappedNativeInterface is JErc20Interface {
 
     function redeemNative(uint256 redeemTokens) external returns (uint256);
 
-    function redeemUnderlyingNative(uint256 redeemAmount) external returns (uint256);
+    function redeemUnderlyingNative(uint256 redeemAmount)
+        external
+        returns (uint256);
 
     function borrowNative(uint256 borrowAmount) external returns (uint256);
 
     function repayBorrowNative() external payable returns (uint256);
 
-    function repayBorrowBehalfNative(address borrower) external payable returns (uint256);
-
-    function liquidateBorrowNative(address borrower, JTokenInterface jTokenCollateral)
+    function repayBorrowBehalfNative(address borrower)
         external
         payable
         returns (uint256);
 
-    function flashLoan(
-        ERC3156FlashBorrowerInterface receiver,
-        address initiator,
-        uint256 amount,
-        bytes calldata data
-    ) external returns (bool);
+    function liquidateBorrowNative(
+        address borrower,
+        JTokenInterface jTokenCollateral
+    ) external payable returns (uint256);
+
+    // function flashLoan(
+    //     ERC3156FlashBorrowerInterface receiver,
+    //     address initiator,
+    //     uint256 amount,
+    //     bytes calldata data
+    // ) external returns (bool);
 
     function _addReservesNative() external payable returns (uint256);
 }
@@ -449,17 +505,25 @@ contract JCapableErc20Interface is JErc20Interface, JSupplyCapStorage {
 
     /*** Market Events ***/
 
-    /**
-     * @notice Event emitted when a flashloan occured
-     */
-    event Flashloan(address indexed receiver, uint256 amount, uint256 totalFee, uint256 reservesFee);
+    // /**
+    //  * @notice Event emitted when a flashloan occured
+    //  */
+    // event Flashloan(
+    //     address indexed receiver,
+    //     uint256 amount,
+    //     uint256 totalFee,
+    //     uint256 reservesFee
+    // );
 
     /*** User Interface ***/
 
     function gulp() external;
 }
 
-contract JCollateralCapErc20Interface is JCapableErc20Interface, JCollateralCapStorage {
+contract JCollateralCapErc20Interface is
+    JCapableErc20Interface,
+    JCollateralCapStorage
+{
     /*** Admin Events ***/
 
     /**
@@ -478,12 +542,12 @@ contract JCollateralCapErc20Interface is JCapableErc20Interface, JCollateralCapS
 
     function unregisterCollateral(address account) external;
 
-    function flashLoan(
-        ERC3156FlashBorrowerInterface receiver,
-        address initiator,
-        uint256 amount,
-        bytes calldata data
-    ) external returns (bool);
+    // function flashLoan(
+    //     ERC3156FlashBorrowerInterface receiver,
+    //     address initiator,
+    //     uint256 amount,
+    //     bytes calldata data
+    // ) external returns (bool);
 
     /*** Admin Functions ***/
 
@@ -494,7 +558,10 @@ contract JDelegatorInterface {
     /**
      * @notice Emitted when implementation is changed
      */
-    event NewImplementation(address oldImplementation, address newImplementation);
+    event NewImplementation(
+        address oldImplementation,
+        address newImplementation
+    );
 
     /**
      * @notice Called by the admin to update the implementation of the delegator
@@ -542,7 +609,10 @@ contract JProtocolSeizeShareStorage {
     /**
      * @notice Event emitted when the protocol share of seized collateral is changed
      */
-    event NewProtocolSeizeShare(uint256 oldProtocolSeizeShareMantissa, uint256 newProtocolSeizeShareMantissa);
+    event NewProtocolSeizeShare(
+        uint256 oldProtocolSeizeShareMantissa,
+        uint256 newProtocolSeizeShareMantissa
+    );
 
     /**
      * @notice Share of seized collateral that is added to reserves

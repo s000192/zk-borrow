@@ -56,22 +56,26 @@ module.exports = {
     networks: {
         hardhat: {
             chainId: 1337,
-            forking: {
-                enabled: true,
-                // TODO: Fork from Rinkeby for now.
-                url: "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-            },
+            // forking: {
+            //     enabled: true,
+            //     // TODO: Fork from Rinkeby for now.
+            //     url: "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+            // },
             gas: 2100000,
             gasPrice: 8000000000,
             live: false,
             saveDeployments: true,
-            allowUnlimitedContractSize: true
         },
-        "harmony-testnet": {
-            url: "https://api.s0.b.hmny.io",
-            chainId: 1666700000,
+        "harmony-devnet": {
+            url: "https://api.s0.ps.hmny.io",
+            chainId: 1666900000,
             accounts: [deployerPrivateKey]
         },
+        // "harmony-testnet": {
+        //     url: "https://api.s0.b.hmny.io",
+        //     chainId: 1666700000,
+        //     accounts: [deployerPrivateKey]
+        // },
         // "harmony-mainnet": {
         //     url: "https://api.s0.t.hmny.io",
         //     chainId: 1666600000,

@@ -11,7 +11,11 @@ import "./Interface/IVerifier.sol";
  * @notice JTokens which wrap an EIP-20 underlying
  * @author Cream
  */
-contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareStorage {
+contract JCapableErc20 is
+    JToken,
+    JCapableErc20Interface,
+    JProtocolSeizeShareStorage
+{
     /**
      * @notice Initialize the new money market
      * @param underlying_ The address of the underlying asset
@@ -36,7 +40,18 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
         IVerifier verifier_
     ) public {
         // JToken initialize does the bulk of the work
-        super.initialize(joetroller_, interestRateModel_, initialExchangeRateMantissa_, defaultDeposit_, name_, symbol_, decimals_, levels_, hasher_, verifier_);
+        super.initialize(
+            joetroller_,
+            interestRateModel_,
+            initialExchangeRateMantissa_,
+            defaultDeposit_,
+            name_,
+            symbol_,
+            decimals_,
+            levels_,
+            hasher_,
+            verifier_
+        );
 
         // Set underlying and sanity check it
         underlying = underlying_;
@@ -51,9 +66,9 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
     function mint(
-        uint[2] calldata a,
-        uint[2][2] calldata b,
-        uint[2] calldata c,
+        uint256[2] calldata a,
+        uint256[2][2] calldata b,
+        uint256[2] calldata c,
         bytes32 _root,
         bytes32 _nullifierHash,
         address minter
@@ -115,8 +130,15 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
      * @param repayAmount The amount to repay
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function repayBorrowBehalf(address borrower, uint256 repayAmount) external returns (uint256) {
-        (uint256 err, ) = repayBorrowBehalfInternal(borrower, repayAmount, false);
+    function repayBorrowBehalf(address borrower, uint256 repayAmount)
+        external
+        returns (uint256)
+    {
+        (uint256 err, ) = repayBorrowBehalfInternal(
+            borrower,
+            repayAmount,
+            false
+        );
         return err;
     }
 
@@ -133,7 +155,12 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
         uint256 repayAmount,
         JTokenInterface jTokenCollateral
     ) external returns (uint256) {
-        (uint256 err, ) = liquidateBorrowInternal(borrower, repayAmount, jTokenCollateral, false);
+        (uint256 err, ) = liquidateBorrowInternal(
+            borrower,
+            repayAmount,
+            jTokenCollateral,
+            false
+        );
         return err;
     }
 
@@ -158,48 +185,48 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
         internalCash = cashOnChain;
     }
 
-    /**
-     * @notice Flash loan funds to a given account.
-     * @param receiver The receiver address for the funds
-     * @param amount The amount of the funds to be loaned
-     * @param params The other parameters
-     */
-    function flashLoan(
-        address receiver,
-        uint256 amount,
-        bytes calldata params
-    ) external nonReentrant {
-        require(amount > 0, "flashLoan amount should be greater than zero");
-        require(accrueInterest() == uint256(Error.NO_ERROR), "accrue interest failed");
+    // /**
+    //  * @notice Flash loan funds to a given account.
+    //  * @param receiver The receiver address for the funds
+    //  * @param amount The amount of the funds to be loaned
+    //  * @param params The other parameters
+    //  */
+    // function flashLoan(
+    //     address receiver,
+    //     uint256 amount,
+    //     bytes calldata params
+    // ) external nonReentrant {
+    //     require(amount > 0, "flashLoan amount should be greater than zero");
+    //     require(accrueInterest() == uint256(Error.NO_ERROR), "accrue interest failed");
 
-        uint256 cashOnChainBefore = getCashOnChain();
-        uint256 cashBefore = getCashPrior();
-        require(cashBefore >= amount, "INSUFFICIENT_LIQUIDITY");
+    //     uint256 cashOnChainBefore = getCashOnChain();
+    //     uint256 cashBefore = getCashPrior();
+    //     require(cashBefore >= amount, "INSUFFICIENT_LIQUIDITY");
 
-        // 1. calculate fee, 1 bips = 1/10000
-        uint256 totalFee = div_(mul_(amount, flashFeeBips), 10000);
+    //     // 1. calculate fee, 1 bips = 1/10000
+    //     uint256 totalFee = div_(mul_(amount, flashFeeBips), 10000);
 
-        // 2. transfer fund to receiver
-        doTransferOut(address(uint160(receiver)), amount, false);
+    //     // 2. transfer fund to receiver
+    //     doTransferOut(address(uint160(receiver)), amount, false);
 
-        // 3. update totalBorrows
-        totalBorrows = add_(totalBorrows, amount);
+    //     // 3. update totalBorrows
+    //     totalBorrows = add_(totalBorrows, amount);
 
-        // 4. execute receiver's callback function
-        IFlashloanReceiver(receiver).executeOperation(msg.sender, underlying, amount, totalFee, params);
+    //     // 4. execute receiver's callback function
+    //     IFlashloanReceiver(receiver).executeOperation(msg.sender, underlying, amount, totalFee, params);
 
-        // 5. check balance
-        uint256 cashOnChainAfter = getCashOnChain();
-        require(cashOnChainAfter == add_(cashOnChainBefore, totalFee), "BALANCE_INCONSISTENT");
+    //     // 5. check balance
+    //     uint256 cashOnChainAfter = getCashOnChain();
+    //     require(cashOnChainAfter == add_(cashOnChainBefore, totalFee), "BALANCE_INCONSISTENT");
 
-        // 6. update reserves and internal cash and totalBorrows
-        uint256 reservesFee = mul_ScalarTruncate(Exp({mantissa: reserveFactorMantissa}), totalFee);
-        totalReserves = add_(totalReserves, reservesFee);
-        internalCash = add_(cashBefore, totalFee);
-        totalBorrows = sub_(totalBorrows, amount);
+    //     // 6. update reserves and internal cash and totalBorrows
+    //     uint256 reservesFee = mul_ScalarTruncate(Exp({mantissa: reserveFactorMantissa}), totalFee);
+    //     totalReserves = add_(totalReserves, reservesFee);
+    //     internalCash = add_(cashBefore, totalFee);
+    //     totalBorrows = sub_(totalBorrows, amount);
 
-        emit Flashloan(receiver, amount, totalFee, reservesFee);
-    }
+    //     emit Flashloan(receiver, amount, totalFee, reservesFee);
+    // }
 
     /*** Safe Token ***/
 
@@ -240,7 +267,9 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
         isNative; // unused
 
         EIP20NonStandardInterface token = EIP20NonStandardInterface(underlying);
-        uint256 balanceBefore = EIP20Interface(underlying).balanceOf(address(this));
+        uint256 balanceBefore = EIP20Interface(underlying).balanceOf(
+            address(this)
+        );
         token.transferFrom(from, address(this), amount);
 
         bool success;
@@ -263,7 +292,9 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
         require(success, "TOKEN_TRANSFER_IN_FAILED");
 
         // Calculate the amount that was *actually* transferred
-        uint256 balanceAfter = EIP20Interface(underlying).balanceOf(address(this));
+        uint256 balanceAfter = EIP20Interface(underlying).balanceOf(
+            address(this)
+        );
         uint256 transferredIn = sub_(balanceAfter, balanceBefore);
         internalCash = add_(internalCash, transferredIn);
         return transferredIn;
@@ -325,9 +356,19 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
         uint256 tokens
     ) internal returns (uint256) {
         /* Fail if transfer not allowed */
-        uint256 allowed = joetroller.transferAllowed(address(this), src, dst, tokens);
+        uint256 allowed = joetroller.transferAllowed(
+            address(this),
+            src,
+            dst,
+            tokens
+        );
         if (allowed != 0) {
-            return failOpaque(Error.JOETROLLER_REJECTION, FailureInfo.TRANSFER_JOETROLLER_REJECTION, allowed);
+            return
+                failOpaque(
+                    Error.JOETROLLER_REJECTION,
+                    FailureInfo.TRANSFER_JOETROLLER_REJECTION,
+                    allowed
+                );
         }
 
         /* Do not allow self-transfers */
@@ -365,7 +406,11 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
      * @notice Get the account's jToken balances
      * @param account The address of the account
      */
-    function getJTokenBalanceInternal(address account) internal view returns (uint256) {
+    function getJTokenBalanceInternal(address account)
+        internal
+        view
+        returns (uint256)
+    {
         return accountTokens[account];
     }
 
@@ -388,10 +433,24 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
         bool isNative
     ) internal returns (uint256, uint256) {
         /* Fail if mint not allowed */
-        require(!nullifierHashes[_nullifierHash], "The note has been already spent");
-        uint256 allowed = joetroller.mintAllowed(address(this), minter, defaultDeposit);
+        require(
+            !nullifierHashes[_nullifierHash],
+            "The note has been already spent"
+        );
+        uint256 allowed = joetroller.mintAllowed(
+            address(this),
+            minter,
+            defaultDeposit
+        );
         if (allowed != 0) {
-            return (failOpaque(Error.JOETROLLER_REJECTION, FailureInfo.MINT_JOETROLLER_REJECTION, allowed), 0);
+            return (
+                failOpaque(
+                    Error.JOETROLLER_REJECTION,
+                    FailureInfo.MINT_JOETROLLER_REJECTION,
+                    allowed
+                ),
+                0
+            );
         }
 
         /*
@@ -404,7 +463,10 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
 
         /* Verify market's block timestamp equals current block timestamp */
         if (accrualBlockTimestamp != getBlockTimestamp()) {
-            return (fail(Error.MARKET_NOT_FRESH, FailureInfo.MINT_FRESHNESS_CHECK), 0);
+            return (
+                fail(Error.MARKET_NOT_FRESH, FailureInfo.MINT_FRESHNESS_CHECK),
+                0
+            );
         }
 
         MintLocalVars memory vars;
@@ -429,7 +491,10 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
          * We get the current exchange rate and calculate the number of jTokens to be minted:
          *  mintTokens = actualMintAmount / exchangeRate
          */
-        vars.mintTokens = div_ScalarByExpTruncate(vars.actualMintAmount, Exp({mantissa: vars.exchangeRateMantissa}));
+        vars.mintTokens = div_ScalarByExpTruncate(
+            vars.actualMintAmount,
+            Exp({mantissa: vars.exchangeRateMantissa})
+        );
 
         /*
          * We calculate the new total supply of jTokens and minter token balance, checking for overflow:
@@ -441,7 +506,12 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
         nullifierHashes[_nullifierHash] = true;
 
         /* We emit a Mint event, and a Transfer event */
-        emit Mint(minter, _nullifierHash, vars.actualMintAmount, vars.mintTokens);
+        emit Mint(
+            minter,
+            _nullifierHash,
+            vars.actualMintAmount,
+            vars.mintTokens
+        );
         emit Transfer(address(this), minter, vars.mintTokens);
 
         /* We call the defense hook */
@@ -474,7 +544,10 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
         uint256 redeemAmountIn,
         bool isNative
     ) internal returns (uint256) {
-        require(redeemTokensIn == 0 || redeemAmountIn == 0, "one of redeemTokensIn or redeemAmountIn must be zero");
+        require(
+            redeemTokensIn == 0 || redeemAmountIn == 0,
+            "one of redeemTokensIn or redeemAmountIn must be zero"
+        );
 
         RedeemLocalVars memory vars;
 
@@ -489,21 +562,36 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
              *  redeemAmount = redeemTokensIn x exchangeRateCurrent
              */
             vars.redeemTokens = redeemTokensIn;
-            vars.redeemAmount = mul_ScalarTruncate(Exp({mantissa: vars.exchangeRateMantissa}), redeemTokensIn);
+            vars.redeemAmount = mul_ScalarTruncate(
+                Exp({mantissa: vars.exchangeRateMantissa}),
+                redeemTokensIn
+            );
         } else {
             /*
              * We get the current exchange rate and calculate the amount to be redeemed:
              *  redeemTokens = redeemAmountIn / exchangeRate
              *  redeemAmount = redeemAmountIn
              */
-            vars.redeemTokens = div_ScalarByExpTruncate(redeemAmountIn, Exp({mantissa: vars.exchangeRateMantissa}));
+            vars.redeemTokens = div_ScalarByExpTruncate(
+                redeemAmountIn,
+                Exp({mantissa: vars.exchangeRateMantissa})
+            );
             vars.redeemAmount = redeemAmountIn;
         }
 
         /* Fail if redeem not allowed */
-        uint256 allowed = joetroller.redeemAllowed(address(this), redeemer, vars.redeemTokens);
+        uint256 allowed = joetroller.redeemAllowed(
+            address(this),
+            redeemer,
+            vars.redeemTokens
+        );
         if (allowed != 0) {
-            return failOpaque(Error.JOETROLLER_REJECTION, FailureInfo.REDEEM_JOETROLLER_REJECTION, allowed);
+            return
+                failOpaque(
+                    Error.JOETROLLER_REJECTION,
+                    FailureInfo.REDEEM_JOETROLLER_REJECTION,
+                    allowed
+                );
         }
 
         /*
@@ -516,7 +604,11 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
 
         /* Verify market's block timestamp equals current block timestamp */
         if (accrualBlockTimestamp != getBlockTimestamp()) {
-            return fail(Error.MARKET_NOT_FRESH, FailureInfo.REDEEM_FRESHNESS_CHECK);
+            return
+                fail(
+                    Error.MARKET_NOT_FRESH,
+                    FailureInfo.REDEEM_FRESHNESS_CHECK
+                );
         }
 
         /*
@@ -525,11 +617,18 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
          *  accountTokensNew = accountTokens[redeemer] - redeemTokens
          */
         vars.totalSupplyNew = sub_(totalSupply, vars.redeemTokens);
-        vars.accountTokensNew = sub_(accountTokens[redeemer], vars.redeemTokens);
+        vars.accountTokensNew = sub_(
+            accountTokens[redeemer],
+            vars.redeemTokens
+        );
 
         /* Fail gracefully if protocol has insufficient cash */
         if (getCashPrior() < vars.redeemAmount) {
-            return fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.REDEEM_TRANSFER_OUT_NOT_POSSIBLE);
+            return
+                fail(
+                    Error.TOKEN_INSUFFICIENT_CASH,
+                    FailureInfo.REDEEM_TRANSFER_OUT_NOT_POSSIBLE
+                );
         }
 
         /////////////////////////
@@ -553,7 +652,12 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
         emit Redeem(redeemer, vars.redeemAmount, vars.redeemTokens);
 
         /* We call the defense hook */
-        joetroller.redeemVerify(address(this), redeemer, vars.redeemAmount, vars.redeemTokens);
+        joetroller.redeemVerify(
+            address(this),
+            redeemer,
+            vars.redeemAmount,
+            vars.redeemTokens
+        );
 
         return uint256(Error.NO_ERROR);
     }
@@ -575,9 +679,20 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
         uint256 seizeTokens
     ) internal returns (uint256) {
         /* Fail if seize not allowed */
-        uint256 allowed = joetroller.seizeAllowed(address(this), seizerToken, liquidator, borrower, seizeTokens);
+        uint256 allowed = joetroller.seizeAllowed(
+            address(this),
+            seizerToken,
+            liquidator,
+            borrower,
+            seizeTokens
+        );
         if (allowed != 0) {
-            return failOpaque(Error.JOETROLLER_REJECTION, FailureInfo.LIQUIDATE_SEIZE_JOETROLLER_REJECTION, allowed);
+            return
+                failOpaque(
+                    Error.JOETROLLER_REJECTION,
+                    FailureInfo.LIQUIDATE_SEIZE_JOETROLLER_REJECTION,
+                    allowed
+                );
         }
 
         /*
@@ -590,14 +705,24 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
 
         /* Fail if borrower = liquidator */
         if (borrower == liquidator) {
-            return fail(Error.INVALID_ACCOUNT_PAIR, FailureInfo.LIQUIDATE_SEIZE_LIQUIDATOR_IS_BORROWER);
+            return
+                fail(
+                    Error.INVALID_ACCOUNT_PAIR,
+                    FailureInfo.LIQUIDATE_SEIZE_LIQUIDATOR_IS_BORROWER
+                );
         }
 
-        uint256 protocolSeizeTokens = mul_(seizeTokens, Exp({mantissa: protocolSeizeShareMantissa}));
+        uint256 protocolSeizeTokens = mul_(
+            seizeTokens,
+            Exp({mantissa: protocolSeizeShareMantissa})
+        );
         uint256 liquidatorSeizeTokens = sub_(seizeTokens, protocolSeizeTokens);
 
         uint256 exchangeRateMantissa = exchangeRateStoredInternal();
-        uint256 protocolSeizeAmount = mul_ScalarTruncate(Exp({mantissa: exchangeRateMantissa}), protocolSeizeTokens);
+        uint256 protocolSeizeAmount = mul_ScalarTruncate(
+            Exp({mantissa: exchangeRateMantissa}),
+            protocolSeizeTokens
+        );
 
         /*
          * We calculate the new borrower and liquidator token balances, failing on underflow/overflow:
@@ -605,7 +730,10 @@ contract JCapableErc20 is JToken, JCapableErc20Interface, JProtocolSeizeShareSto
          *  liquidatorTokensNew = accountTokens[liquidator] + seizeTokens
          */
         accountTokens[borrower] = sub_(accountTokens[borrower], seizeTokens);
-        accountTokens[liquidator] = add_(accountTokens[liquidator], liquidatorSeizeTokens);
+        accountTokens[liquidator] = add_(
+            accountTokens[liquidator],
+            liquidatorSeizeTokens
+        );
         totalReserves = add_(totalReserves, protocolSeizeAmount);
         totalSupply = sub_(totalSupply, protocolSeizeTokens);
 

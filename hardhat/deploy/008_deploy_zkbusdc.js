@@ -1,3 +1,5 @@
+const { BigNumber } = require("ethers");
+
 const USDC = new Map();
 USDC.set("4", "0x4dbcdf9b62e891a7cec5a2568c3f4faf9e8abe2b");
 USDC.set("1337", "0x4dbcdf9b62e891a7cec5a2568c3f4faf9e8abe2b");
@@ -36,7 +38,7 @@ module.exports = async function ({
   let usdcAddress = USDC.get(chainId);
 
   // TODO: Adding this temporarily for testing.
-  if (chainId === '1337') {
+  if (chainId === '1337' || chainId === '1666900000') {
     const usdcDeployment = await deploy("USDC", {
       from: deployer,
       args: [
@@ -84,12 +86,22 @@ module.exports = async function ({
     gasLimit: 2000000,
   });
 
-  const priceOracle = await ethers.getContract("PriceOracleProxyUSD");
-  console.log("Setting price feed source for zkbUSDC");
-  await priceOracle._setAggregators(
-    [jUsdcDelegator.address],
-    [USDC_PRICE_FEED.get(chainId)]
-  );
+  // TODO: Adding this temporarily for testing.
+  if (chainId === '1337' || chainId === '1666900000') {
+    const priceOracle = await ethers.getContract("MockOracle");
+    console.log("Setting price feed source for zkbUSDC");
+    await priceOracle._setUnderlyingPrice(
+      jUsdcDelegator.address,
+      BigNumber.from("100079980")
+    );
+  } else {
+    const priceOracle = await ethers.getContract("PriceOracleProxyUSD");
+    console.log("Setting price feed source for zkbUSDC");
+    await priceOracle._setAggregators(
+      [jUsdcDelegator.address],
+      [USDC_PRICE_FEED.get(chainId)]
+    );
+  }
 
   const collateralFactor = "0.80";
   console.log("Setting collateral factor ", collateralFactor);
