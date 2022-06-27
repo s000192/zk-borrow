@@ -12,7 +12,6 @@ import "./JoetrollerInterface.sol";
 import "./JoetrollerStorage.sol";
 import "./RewardDistributor.sol";
 import "./Unitroller.sol";
-import "hardhat/console.sol";
 
 /**
  * @title Compound's Joetroller Contract

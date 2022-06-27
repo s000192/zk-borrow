@@ -1,12 +1,12 @@
 const USDC = new Map();
 USDC.set("4", "0x4dbcdf9b62e891a7cec5a2568c3f4faf9e8abe2b");
 USDC.set("1337", "0x4dbcdf9b62e891a7cec5a2568c3f4faf9e8abe2b");
-USDC.set("1313161554", "");
+USDC.set("1666700000", "0x289590A672C3Eb0AE9c952dBbf00E489f3F0B7b1"); // https://testnet.bridge.hmny.io/tokens
 
 const USDC_PRICE_FEED = new Map();
 USDC_PRICE_FEED.set("4", "0xa24de01df22b63d23Ebc1882a5E3d4ec0d907bFB");
 USDC_PRICE_FEED.set("1337", "0xa24de01df22b63d23Ebc1882a5E3d4ec0d907bFB");
-USDC_PRICE_FEED.set("1313161554", "");
+USDC_PRICE_FEED.set("1666700000", "0xa0ABAcC3162430b67Aa6C135dfAA08E117A38bF0"); // https://docs.chain.link/docs/harmony-price-feeds/
 
 module.exports = async function ({
   getChainId,

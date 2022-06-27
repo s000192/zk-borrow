@@ -12,7 +12,6 @@ import "./InterestRateModel.sol";
 import "./Verifier.sol";
 import "./Interface/IHasher.sol";
 import "./Interface/IVerifier.sol";
-import "hardhat/console.sol";
 
 /**
  * @title Compound's JToken Contract

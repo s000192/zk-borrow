@@ -5,7 +5,7 @@ pragma solidity ^0.5.16;
 import "./JTokenInterfaces.sol";
 import "./Interface/IHasher.sol";
 import "./Interface/IVerifier.sol";
-import "hardhat/console.sol";
+
 /**
  * @title Compound's JWrappedNativeDelegator Contract
  * @notice JTokens which wrap an EIP-20 underlying and delegate to an implementation

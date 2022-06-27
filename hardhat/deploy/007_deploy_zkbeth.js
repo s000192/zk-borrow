@@ -1,12 +1,12 @@
 const WETH = new Map();
 WETH.set("4", "0xc778417e063141139fce010982780140aa0cd5ab");
 WETH.set("1337", "0xc778417e063141139fce010982780140aa0cd5ab");
-WETH.set("1313161554", "");
+WETH.set("1666700000", "0x268d6fF391B41B36A13B1693BD25f87FB4E4b392"); // https://testnet.bridge.hmny.io/tokens
 
 const ETH_PRICE_FEED = new Map();
 ETH_PRICE_FEED.set("4", "0x8A753747A1Fa494EC906cE90E9f37563A8AF630e");
 ETH_PRICE_FEED.set("1337", "0x8A753747A1Fa494EC906cE90E9f37563A8AF630e");
-ETH_PRICE_FEED.set("1313161554", "");
+ETH_PRICE_FEED.set("1666700000", "0x4f11696cE92D78165E1F8A9a4192444087a45b64"); // https://docs.chain.link/docs/harmony-price-feeds/
 
 module.exports = async function ({
   getChainId,

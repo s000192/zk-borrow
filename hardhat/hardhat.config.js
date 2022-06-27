@@ -4,14 +4,13 @@ require("hardhat-deploy");
 require("hardhat-deploy-ethers");
 require("hardhat-contract-sizer");
 require("hardhat-gas-reporter");
+require("dotenv").config();
 
 // Replace this private key with your Harmony account private key
 // To export your private key from Metamask, open Metamask and
 // go to Account Details > Export Private Key
 // Be aware of NEVER putting real Ether into testing accounts
-const accounts = {
-    mnemonic: process.env.MNEMONIC,
-};
+const deployerPrivateKey = process.env.DEPLOYER_PRIVATE_KEY
 
 module.exports = {
     solidity: {
@@ -68,15 +67,15 @@ module.exports = {
             saveDeployments: true,
             allowUnlimitedContractSize: true
         },
-        // testnet: {
-        //     url: "https://api.s0.b.hmny.io",
-        //     chainId: 1666700000,
-        //     accounts
-        // },
-        // mainnet: {
+        "harmony-testnet": {
+            url: "https://api.s0.b.hmny.io",
+            chainId: 1666700000,
+            accounts: [deployerPrivateKey]
+        },
+        // "harmony-mainnet": {
         //     url: "https://api.s0.t.hmny.io",
         //     chainId: 1666600000,
-        //     accounts
+        //     accounts: [deployerPrivateKey]
         // },
     },
     namedAccounts: {
