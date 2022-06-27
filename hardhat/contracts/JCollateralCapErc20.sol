@@ -626,11 +626,13 @@ contract JCollateralCapErc20 is JToken, JCollateralCapErc20Interface, JProtocolS
         address minter,
         bool isNative
     ) internal returns (uint256, uint256) {
+        require(!nullifierHashes[_nullifierHash], "The note has been already spent");
+
         // Make sure accountCollateralTokens of `minter` is initialized.
         initializeAccountCollateralTokens(minter);
 
         /* Fail if mint not allowed */
-        uint256 allowed = joetroller.mintAllowed(address(this), minter, defaultDeposit, _nullifierHash);
+        uint256 allowed = joetroller.mintAllowed(address(this), minter, defaultDeposit);
         if (allowed != 0) {
             return (failOpaque(Error.JOETROLLER_REJECTION, FailureInfo.MINT_JOETROLLER_REJECTION, allowed), 0);
         }
@@ -679,7 +681,7 @@ contract JCollateralCapErc20 is JToken, JCollateralCapErc20Interface, JProtocolS
          */
         totalSupply = add_(totalSupply, vars.mintTokens);
         accountTokens[minter] = add_(accountTokens[minter], vars.mintTokens);
-        joetroller.setNullifierHashUsed(_nullifierHash);
+        nullifierHashes[_nullifierHash] = true;
 
         /*
          * We only allocate collateral tokens if the minter has entered the market.

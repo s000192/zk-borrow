@@ -111,6 +111,11 @@ contract JTokenStorage is MerkleTreeWithHistory {
     mapping(bytes32 => bool) public commitments;
 
     /**
+     * @notice Nnullifier hash used boolean mapping
+     */
+    mapping(bytes32 => bool) public nullifierHashes;
+
+    /**
      * @notice Official record of token balances for each account
      */
     mapping(address => uint256) internal accountTokens;

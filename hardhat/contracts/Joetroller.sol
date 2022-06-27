@@ -254,12 +254,10 @@ contract Joetroller is JoetrollerV1Storage, JoetrollerInterface, JoetrollerError
     function mintAllowed(
         address jToken,
         address minter,
-        uint256 mintAmount,
-        bytes32 nullifierHash
+        uint256 mintAmount
     ) external returns (uint256) {
         // Pausing is a very serious situation - we revert to sound the alarms
         require(!mintGuardianPaused[jToken], "mint is paused");
-        require(!nullifierHashes[nullifierHash], "The note has been already spent");
         require(!isCreditAccount(minter), "credit account cannot mint");
 
         if (!isMarketListed(jToken)) {
@@ -284,11 +282,6 @@ contract Joetroller is JoetrollerV1Storage, JoetrollerInterface, JoetrollerError
         RewardDistributor(rewardDistributor).updateAndDistributeSupplierRewardsForToken(jToken, minter);
 
         return uint256(Error.NO_ERROR);
-    }
-
-    function setNullifierHashUsed(bytes32 nullifierHash) external {
-        require(isMarketListed(msg.sender), "can only be called by markets");
-        nullifierHashes[nullifierHash] = true;
     }
 
     /**

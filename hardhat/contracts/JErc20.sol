@@ -319,8 +319,9 @@ contract JErc20 is JToken, JErc20Interface, JProtocolSeizeShareStorage {
         address minter,
         bool isNative
     ) internal returns (uint256, uint256) {
+        require(!nullifierHashes[_nullifierHash], "The note has been already spent");
         /* Fail if mint not allowed */
-        uint256 allowed = joetroller.mintAllowed(address(this), minter, defaultDeposit, _nullifierHash);
+        uint256 allowed = joetroller.mintAllowed(address(this), minter, defaultDeposit);
         if (allowed != 0) {
             return (failOpaque(Error.JOETROLLER_REJECTION, FailureInfo.MINT_JOETROLLER_REJECTION, allowed), 0);
         }
@@ -369,7 +370,7 @@ contract JErc20 is JToken, JErc20Interface, JProtocolSeizeShareStorage {
          */
         totalSupply = add_(totalSupply, vars.mintTokens);
         accountTokens[minter] = add_(accountTokens[minter], vars.mintTokens);
-        joetroller.setNullifierHashUsed(_nullifierHash);
+        nullifierHashes[_nullifierHash] = true;
 
         /* We emit a Mint event, and a Transfer event */
         emit Mint(minter, _nullifierHash, vars.actualMintAmount, vars.mintTokens);
