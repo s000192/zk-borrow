@@ -2,7 +2,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
   const hasher = await ethers.getContract("Hasher");
-  const joetroller = await ethers.getContract("Joetroller");
+  const Joetroller = await ethers.getContract("Joetroller");
+  const unitroller = await ethers.getContract("Unitroller");
+  const joetroller = Joetroller.attach(unitroller.address);
 
   await deploy('MerkleTreeWithHistory', {
     from: deployer,
