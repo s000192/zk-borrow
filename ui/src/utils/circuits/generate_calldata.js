@@ -1,7 +1,7 @@
 /* global BigInt */
 
 import { generateWitness } from './generate_witness';
-import { groth16 } from 'snarkjs';
+const { groth16 } = require("snarkjs")
 
 import { F1Field, Scalar } from "ffjavascript";
 const Fr = new F1Field(Scalar.fromString("21888242871839275222246405745257275088548364400416034343698204186575808495617"));
@@ -10,29 +10,29 @@ export async function generateCalldata(input) {
 
     let generateWitnessSuccess = true;
 
-    let formattedInput = {};
+    // let formattedInput = {};
 
-    for (var key in input) {
-        formattedInput[key] = Fr.e(input[key]);
-    }
+    // for (var key in input) {
+    //     if (typeof input[key] === 'object') {
+    //         formattedInput[key] = input[key].map(value => Fr.e(value));
+    //     } else {
+    //         formattedInput[key] = Fr.e(input[key]);
+    //     }
+    // }
 
-    let witness = await generateWitness(formattedInput).then()
+    let witness = await generateWitness(input).then()
         .catch((error) => {
             console.error(error);
             generateWitnessSuccess = false;
         });
 
-    //console.log(witness);
-
     if (!generateWitnessSuccess) { return; }
 
-    const { proof, publicSignals } = await groth16.prove('withdraw_final.zkey', witness);
+    const { proof, publicSignals } = await groth16.prove('/withdraw_final.zkey', witness);
 
     const calldata = await groth16.exportSolidityCallData(proof, publicSignals);
 
     const argv = calldata.replace(/["[\]\s]/g, "").split(',').map(x => BigInt(x).toString());
-
-    //console.log(argv);
 
     const a = [argv[0], argv[1]];
     const b = [[argv[2], argv[3]], [argv[4], argv[5]]];

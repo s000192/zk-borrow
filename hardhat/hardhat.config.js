@@ -65,6 +65,9 @@ module.exports = {
             gasPrice: 8000000000,
             live: false,
             saveDeployments: true,
+            accounts: [{
+                privateKey: deployerPrivateKey, balance: "3321000000000000000000000"
+            }]
         },
         "harmony-devnet": {
             url: "https://api.s0.ps.hmny.io",

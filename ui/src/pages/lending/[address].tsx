@@ -16,10 +16,11 @@ import { useConnect } from '../../contexts/ConnectContext';
 import zkbTokenAbi from "../../abis/zkbToken.json";
 import erc20TokenAbi from "../../abis/erc20.json";
 import { useRouter } from 'next/router';
-import { createDeposit, rbigint, toHex } from '../../utils/helpers/transactions';
+import { createDeposit, getDepositEvents, generateMerkleProof, parseNote, rbigint, toHex } from '../../utils/helpers/transactions';
 import { Deposit, MarketDetails } from '../../data/types';
 import getMarketDetails from '../../contracts/getMarketDetails';
 import { formatUnits } from 'ethers/lib/utils';
+import { generateCalldata } from '../../utils/circuits/generate_calldata';
 
 type Tab = "DEPOSIT" | "REDEEM"
 
@@ -155,6 +156,7 @@ const Supply: NextPage = () => {
     borrowed: 0,
     liquidity: 0,
   });
+  const [statusMessage, setStatusMessage] = useState("");
 
   const checkAllowance = async () => {
     const allowance = await underlying?.allowance(address, marketAddress);
@@ -187,11 +189,11 @@ const Supply: NextPage = () => {
     }
 
     try {
-      const deposit: Deposit = createDeposit({ nullifier: rbigint(31), secret: rbigint(31) })
-      const note = toHex(deposit.preimage, 62)
+      const deposit: Deposit = createDeposit({ nullifier: rbigint(31), secret: rbigint(31) });
+      const note = toHex(deposit.preimage, 62);
       const amount = formatUnits(defaultDeposit.toString(), marketDetails.decimals);
       const noteString = `zkborrow-${marketDetails.symbol}-${amount}-${chainId}-${note}`
-      console.log(`Your note: ${noteString}`)
+      console.log(`${noteString}`)
       const depositTx = await market.deposit(deposit.commitmentHex);
       const receipt = await depositTx.wait();
       console.log(receipt);
@@ -200,7 +202,41 @@ const Supply: NextPage = () => {
     }
   }
 
-  const handleRedeemButtonClick = () => {
+  const handleMintButtonClick = async () => {
+    if (!market) return;
+    const minter = "0xCb49cC137f80A0541039d2A205D1A1b7DDBa9566";
+
+    try {
+      const events = await getDepositEvents(market);
+      const { deposit } = parseNote("zkborrow-USDC-1000.0-1337-0xc85b44c1d87192e70d9ea2bf221073737efaeea8e90cbe90964962d51e3b8cc5c79e8b461886b0504ca4f2e1ced85d4d5220898b9adf4b67bf66907bb85f");
+      const { nullifierHash, nullifier, secret } = deposit;
+
+      setStatusMessage("Generating merkle proof...")
+      const { root, pathElements, pathIndices } = await generateMerkleProof(events, deposit);
+      const input = {
+        root,
+        nullifierHash,
+        nullifier,
+        secret,
+        pathElements,
+        pathIndices,
+      }
+
+      setStatusMessage("Preparing transaction data...")
+      const calldata = await generateCalldata(input);
+      if (!calldata) return;
+
+      // TODO: should validate on-chain data before sending tx (isValidRoot & isSpent & leafIndex >= 0)
+      setStatusMessage("Sending your transaction!")
+      const mintTx = await market.mint(calldata[0], calldata[1], calldata[2], toHex(root), toHex(nullifierHash), minter);
+      const receipt = await mintTx.wait();
+      setStatusMessage(`Your transaction hash: ${receipt.transactionHash}`)
+    } catch (e: any) {
+      setStatusMessage(JSON.stringify(e))
+    }
+  }
+
+  const handleRedeemButtonClick = async () => {
 
   }
 
@@ -290,10 +326,6 @@ const Supply: NextPage = () => {
               </InfoGrid>
             </Grid>
             <Grid item xs>
-              <NumberField></NumberField>
-              <Button>Max</Button>
-            </Grid>
-            <Grid item xs>
               <Button
                 onClick={allowanceEnough ?
                   (tab === "DEPOSIT" ? handleDepositButtonClick : handleRedeemButtonClick) :
@@ -303,7 +335,12 @@ const Supply: NextPage = () => {
                 {allowanceEnough ? tab : "approve"}
               </Button>
             </Grid>
+            <Grid item xs>
+              <NumberField></NumberField>
+              <Button onClick={handleMintButtonClick}>Mint</Button>
+            </Grid>
           </InfoGrid>
+          <InfoBox>{statusMessage}</InfoBox>
         </Grid>
       </InfoGrid >
     </>
