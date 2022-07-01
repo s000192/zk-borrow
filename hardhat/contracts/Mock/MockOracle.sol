@@ -1,8 +1,10 @@
 pragma solidity ^0.5.16;
 import "../JToken.sol";
 import "../JErc20.sol";
+import "../EIP20Interface.sol";
+import "../Exponential.sol";
 
-contract MockOracle {
+contract MockOracle is Exponential {
     mapping(address => uint256) internal prices;
     address public admin;
 
@@ -13,10 +15,17 @@ contract MockOracle {
     function getUnderlyingPrice(JToken jToken) public view returns (uint256) {
         address jTokenAddress = address(jToken);
         address asset = address(JErc20(jTokenAddress).underlying());
-
-        uint256 price = prices[asset];
+        uint256 price = mul_(prices[asset], 10**10);
         require(price > 0, "invalid price");
-        return price;
+
+        uint256 underlyingDecimals = EIP20Interface(
+            JErc20(jTokenAddress).underlying()
+        ).decimals();
+
+        if (underlyingDecimals <= 18) {
+            return mul_(price, 10**(18 - underlyingDecimals));
+        }
+        return div_(price, 10**(underlyingDecimals - 18));
     }
 
     function _setUnderlyingPrice(JToken jToken, uint256 underlyingPriceMantissa)
