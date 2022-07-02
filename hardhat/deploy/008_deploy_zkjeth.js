@@ -67,8 +67,8 @@ module.exports = async function ({
       interestRateModel.address,
       ethers.utils.parseUnits("2", 26).toString(),
       ethers.utils.parseEther("1").toString(), // default deposit
-      "ZkBorrow ETH",
-      "zkbETH",
+      "ZkJoe ETH",
+      "zkjETH",
       8,
       deployer,
       jAvaxDelegate.address,
@@ -84,10 +84,10 @@ module.exports = async function ({
   await deployment.receipt;
   const jAvaxDelegator = await ethers.getContract("JAvaxDelegator");
 
-  console.log("Initializing merkle tree for zkbETH...");
+  console.log("Initializing merkle tree for zkjETH...");
   await merkleTreeWithHistory.initializeTree(jAvaxDelegator.address);
 
-  console.log("Supporting zkbETH market...");
+  console.log("Supporting zkjETH market...");
   await joetroller._supportMarket(jAvaxDelegator.address, 2, {
     gasLimit: 2000000,
   });
@@ -95,14 +95,14 @@ module.exports = async function ({
   // TODO: Adding this temporarily for testing.
   if (chainId === '1337' || chainId === '1666900000') {
     const priceOracle = await ethers.getContract("MockOracle");
-    console.log("Setting price feed source for zkbETH");
+    console.log("Setting price feed source for zkjETH");
     await priceOracle._setUnderlyingPrice(
       jAvaxDelegator.address,
       BigNumber.from("123432000000")
     );
   } else {
     const priceOracle = await ethers.getContract("PriceOracleProxyUSD");
-    console.log("Setting price feed source for zkbETH");
+    console.log("Setting price feed source for zkjETH");
     await priceOracle._setAggregators(
       [jAvaxDelegator.address],
       [ETH_PRICE_FEED.get(chainId)]
@@ -123,7 +123,7 @@ module.exports = async function ({
   );
 };
 
-module.exports.tags = ["zkbETH"];
+module.exports.tags = ["zkjETH"];
 module.exports.dependencies = [
   "Joetroller",
   "TripleSlopeRateModel",

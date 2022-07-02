@@ -65,8 +65,8 @@ module.exports = async function ({
       interestRateModel.address,
       ethers.utils.parseUnits("2", 14).toString(),
       ethers.utils.parseUnits("1000", 6).toString(), // default deposit
-      "ZkBorrow USD coin",
-      "zkbUSDC",
+      "ZkJoe USD coin",
+      "zkjUSDC",
       8,
       deployer,
       jUsdcDelegate.address,
@@ -85,7 +85,7 @@ module.exports = async function ({
   console.log("Initializing merkle tree...");
   await merkleTreeWithHistory.initializeTree(jUsdcDelegator.address);
 
-  console.log("Supporting zkbUSDC market...");
+  console.log("Supporting zkjUSDC market...");
   await joetroller._supportMarket(jUsdcDelegator.address, 1, {
     gasLimit: 2000000,
   });
@@ -93,14 +93,14 @@ module.exports = async function ({
   // TODO: Adding this temporarily for testing.
   if (chainId === '1337' || chainId === '1666900000') {
     const priceOracle = await ethers.getContract("MockOracle");
-    console.log("Setting price feed source for zkbUSDC");
+    console.log("Setting price feed source for zkjUSDC");
     await priceOracle._setUnderlyingPrice(
       jUsdcDelegator.address,
       BigNumber.from("100079980")
     );
   } else {
     const priceOracle = await ethers.getContract("PriceOracleProxyUSD");
-    console.log("Setting price feed source for zkbUSDC");
+    console.log("Setting price feed source for zkjUSDC");
     await priceOracle._setAggregators(
       [jUsdcDelegator.address],
       [USDC_PRICE_FEED.get(chainId)]
@@ -121,7 +121,7 @@ module.exports = async function ({
   );
 };
 
-module.exports.tags = ["zkbUSDC"];
+module.exports.tags = ["zkjUSDC"];
 module.exports.dependencies = [
   "Joetroller",
   "TripleSlopeRateModel",
