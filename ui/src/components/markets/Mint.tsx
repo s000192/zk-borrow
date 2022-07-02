@@ -6,7 +6,7 @@ import { generateMerkleProof, getDepositEvents, parseNote, toHex } from '../../u
 import Button from '../shared/Button'
 import InfoBox from '../shared/InfoBox'
 import InfoGrid from '../shared/InfoGrid'
-import NumberField from '../shared/NumberField'
+import TextField from '../shared/TextField'
 
 const Mint = ({ underlyingSymbol,
   suppliedBalance, market, refreshSuppliedBalance }: {
@@ -84,9 +84,9 @@ const Mint = ({ underlyingSymbol,
       </Grid>
       <Grid item xs>
         <InfoBox>Receiver</InfoBox>
-        <NumberField onChange={handleReceiverChange} />
+        <TextField onChange={handleReceiverChange} />
         <InfoBox>Deposit Note</InfoBox>
-        <NumberField onChange={handleDepositNoteChange} />
+        <TextField onChange={handleDepositNoteChange} />
         <Button onClick={() => handleMintButtonClick(receiver, depositNote)}>Mint</Button>
         <InfoBox>{statusMessage}</InfoBox>
       </Grid>

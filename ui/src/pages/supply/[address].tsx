@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Box, Grid, styled } from "@mui/material";
 import type { NextPage } from "next";
 import InfoGrid from "../../components/shared/InfoGrid";
 import InfoBox from "../../components/shared/InfoBox";
@@ -17,6 +17,7 @@ import Mint from "../../components/markets/Mint";
 import Deposit from "../../components/markets/Deposit";
 import Redeem from '../../components/markets/Redeem';
 import { formatUnits } from 'ethers/lib/utils';
+import Container from '../../components/shared/Container';
 
 type Tab = "DEPOSIT" | "REDEEM" | "MINT";
 
@@ -107,8 +108,8 @@ const Supply: NextPage = () => {
   }, [refreshSuppliedBalance])
 
   return (
-    <>
-      <InfoBox>{marketDetails.symbol}</InfoBox>
+    <Container>
+      <InfoBox>{marketDetails.symbol} Supply Market</InfoBox>
       <InfoGrid container direction="row">
         {/* <Grid item xs>
           <InfoGrid container direction="column">
@@ -159,7 +160,7 @@ const Supply: NextPage = () => {
           </InfoGrid>
         </Grid>
       </InfoGrid>
-    </>
+    </Container>
   );
 };
 

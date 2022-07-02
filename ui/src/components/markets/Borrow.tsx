@@ -2,7 +2,7 @@ import { Grid } from "@mui/material";
 import InfoBox from "../shared/InfoBox";
 import Button from "../shared/Button";
 import { Contract } from "ethers";
-import NumberField from '../shared/NumberField';
+import TextField from '../shared/TextField';
 import { useState } from 'react';
 import { parseUnits } from 'ethers/lib/utils';
 import InfoGrid from '../shared/InfoGrid';
@@ -98,7 +98,7 @@ const Borrow = ({
       </Grid>
       <Grid item xs>
         <InfoBox>{`Amount (${underlyingSymbol})`}</InfoBox>
-        <NumberField type="number" value={amount} onChange={handleAmountChange} />
+        <TextField type="number" value={amount} onChange={handleAmountChange} />
         <Button onClick={action === "BORROW" ? handleBorrowButtonClick : handleRepayButtonClick}>{action}</Button>
       </Grid>
       <InfoBox>{statusMessage}</InfoBox>

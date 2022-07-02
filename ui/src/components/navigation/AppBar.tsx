@@ -6,9 +6,6 @@ import Image from "../shared/Image";
 const AppBar = () => {
   return (
     <Box display="flex">
-      <NextLink href="/">
-        <Image src={"images/small_logo.png"} alt="logo" width={150} />
-      </NextLink>
       <Box flex={1} />
       <Box>
         <ConnectWallet />

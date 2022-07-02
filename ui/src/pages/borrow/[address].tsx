@@ -14,6 +14,7 @@ import { useRouter } from "next/router";
 import { MarketDetails } from "../../data/types";
 import getMarketDetails from "../../contracts/getMarketDetails";
 import Borrow from '../../components/markets/Borrow';
+import Container from '../../components/shared/Container';
 
 type Tab = "BORROW" | "REPAY";
 
@@ -76,8 +77,8 @@ const Supply: NextPage = () => {
   }, [provider, address, marketAddress, refreshMarketDetails]);
 
   return (
-    <>
-      <InfoBox>{marketDetails.symbol}</InfoBox>
+    <Container>
+      <InfoBox>{marketDetails.symbol} Borrow Market</InfoBox>
       <InfoGrid container direction="row">
         <Grid item xs>
           <InfoGrid container direction="column">
@@ -103,7 +104,7 @@ const Supply: NextPage = () => {
           </InfoGrid>
         </Grid>
       </InfoGrid>
-    </>
+    </Container>
   );
 };
 

@@ -2,9 +2,9 @@ import Box, { BoxProps } from "@mui/material/Box";
 import { styled } from "@mui/material";
 
 const StyledBox = styled(Box)(({ theme }) => ({
-  // border: `2px solid ${theme.palette.primary.main}`,
+  // border: `1px solid ${theme.palette.primary.main}`,
   display: "flex",
-  color: "#000"
+  color: "#000",
   // "& > *:not(:last-child)": {
   //   borderRight: `2px solid ${theme.palette.primary.main}`,
   // },
