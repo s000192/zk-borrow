@@ -44,7 +44,7 @@ const fading = keyframes`
 
 const Image = styled("div")((theme) => ({
   animation: `${fading} 3000ms ease-out infinite`,
-  // backgroundImage: `url("./images/zkborrow-bg.png")`,
+  // backgroundImage: `url("./images/zkjoe-bg.png")`,
   backgroundAttachment: "fixed",
   backgroundSize: "cover",
   width: "100vw",

@@ -50,7 +50,7 @@ export async function generateMerkleProof(events, deposit) {
 }
 
 export function parseNote(noteString) {
-  const noteRegex = /zkborrow-(?<currency>\w+)-(?<amount>[\d.]+)-(?<netId>\d+)-0x(?<note>[0-9a-fA-F]{124})/g
+  const noteRegex = /zkjoe-(?<currency>\w+)-(?<amount>[\d.]+)-(?<netId>\d+)-0x(?<note>[0-9a-fA-F]{124})/g
   const match = noteRegex.exec(noteString)
   if (!match) {
     throw new Error('The note has invalid format')

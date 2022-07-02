@@ -1,5 +1,5 @@
 import { Contract, providers, utils } from "ethers";
-import mTokenAbi from "../abis/zkbToken.json"
+import mTokenAbi from "../abis/zkjToken.json"
 import getUnderlyingPrice from "./getUnderlyingPrice";
 
 const getUnderlyingAmount = async (

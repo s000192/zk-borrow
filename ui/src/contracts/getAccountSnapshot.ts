@@ -1,5 +1,5 @@
 import { Contract, providers, utils } from "ethers";
-import mTokenAbi from "../abis/zkbToken.json"
+import mTokenAbi from "../abis/zkjToken.json"
 
 const getAccountSnapshot = async (
   provider: providers.Web3Provider,

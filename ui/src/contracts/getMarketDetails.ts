@@ -14,12 +14,7 @@ import getUnderlyingPrice from './getUnderlyingPrice';
 const getMarketDetails = async (marketAddress: string, provider: Web3Provider, address: Address): Promise<MarketDetails> => {
   const underlyingTokenAddress = await getUnderlying(provider, marketAddress);
   const { decimals, symbol } = await getTokenInfo(provider, underlyingTokenAddress);
-  let underlyingTokenBalance;
-  if (symbol === "WETH") {
-    underlyingTokenBalance = await provider.getBalance(address);
-  } else {
-    underlyingTokenBalance = await getTokenBalance(provider, address, underlyingTokenAddress);
-  }
+  const underlyingTokenBalance = await getTokenBalance(provider, address, underlyingTokenAddress);
   const underlyingPrice = await getUnderlyingPrice(provider, marketAddress, decimals);
   const accountSnapshot = await getAccountSnapshot(
     provider,

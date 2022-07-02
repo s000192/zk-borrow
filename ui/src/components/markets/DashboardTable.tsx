@@ -10,7 +10,7 @@ import { percentFormatter } from '../../utils/formatter/percentFormatter';
 import getMarketDetails from '../../contracts/getMarketDetails';
 
 interface Column {
-  id: 'asset' | 'apy' | 'balance' | 'supplied' | 'borrowed' | 'liquidity';
+  id: 'asset' | 'apy' | 'balance' | 'liquidity';
   label: string;
   minWidth?: number;
   align?: 'right';
@@ -36,26 +36,26 @@ const columns: Column[] = [
       { minimumFractionDigits: 2 }
     ),
   },
-  {
-    id: 'supplied',
-    label: 'Supplied',
-    minWidth: 100,
-    align: 'right',
-    format: (value: number) => value.toLocaleString(
-      undefined,
-      { minimumFractionDigits: 2 }
-    ),
-  },
-  {
-    id: 'borrowed',
-    label: 'Borrowed',
-    minWidth: 100,
-    align: 'right',
-    format: (value: number) => value.toLocaleString(
-      undefined,
-      { minimumFractionDigits: 2 }
-    ),
-  },
+  // {
+  //   id: 'supplied',
+  //   label: 'Supplied',
+  //   minWidth: 100,
+  //   align: 'right',
+  //   format: (value: number) => value.toLocaleString(
+  //     undefined,
+  //     { minimumFractionDigits: 2 }
+  //   ),
+  // },
+  // {
+  //   id: 'borrowed',
+  //   label: 'Borrowed',
+  //   minWidth: 100,
+  //   align: 'right',
+  //   format: (value: number) => value.toLocaleString(
+  //     undefined,
+  //     { minimumFractionDigits: 2 }
+  //   ),
+  // },
   {
     id: 'liquidity',
     label: 'Liquidity',
@@ -105,15 +105,15 @@ const DashboardTable = ({ side }: { side: Side }) => {
   const [comptroller, setComptroller] = useState<Contract>();
   const [markets, setMarkets] = useState<Array<Data>>([]);
 
-  const filteredColumns = columns.filter((column) => {
-    if (column.id === "supplied") {
-      return side === "supply";
-    } else if (column.id === "borrowed") {
-      return side === "borrow";
-    } else {
-      return true;
-    }
-  });
+  // const filteredColumns = columns.filter((column) => {
+  //   if (column.id === "supplied") {
+  //     return side === "supply";
+  //   } else if (column.id === "borrowed") {
+  //     return side === "borrow";
+  //   } else {
+  //     return true;
+  //   }
+  // });
 
   useEffect(() => {
     if (comptroller || !provider || !chainId) return;
@@ -168,7 +168,7 @@ const DashboardTable = ({ side }: { side: Side }) => {
               </StyledTableCell>
             </TableRow>
             <TableRow>
-              {filteredColumns.map((column) => (
+              {columns.map((column) => (
                 <StyledTableCell
                   key={column.id}
                   align={column.align}
@@ -184,7 +184,7 @@ const DashboardTable = ({ side }: { side: Side }) => {
             {markets.map((market) => {
               return (
                 <TableRow hover role="checkbox" tabIndex={-1} key={market.asset}>
-                  {filteredColumns.map((column) => {
+                  {columns.map((column) => {
                     const value = market[column.id];
                     return (
                       <StyledTableCell key={column.id} align={column.align}>

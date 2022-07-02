@@ -1,5 +1,5 @@
 {
-  "name": "zkborrow-interface",
+  "name": "zkjoe-interface",
   "private": true,
   "scripts": {
     "dev": "next dev",

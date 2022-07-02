@@ -1,4 +1,4 @@
-import mTokenAbi from "../abis/zkbToken.json";
+import mTokenAbi from "../abis/zkjToken.json";
 import { providers, Contract } from "ethers";
 
 const getUnderlying = async (provider: providers.Web3Provider, marketAddress: string) => {

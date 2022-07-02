@@ -12,8 +12,8 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ThemeProvider theme={theme}>
       <Head>
-        <title>Lending | ZkBorrow</title>
-        <meta name="description" content="Built by ZkBorrow team" />
+        <title>Lending | ZkJoe</title>
+        <meta name="description" content="Built by ZkJoe team" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <CssBaseline />
