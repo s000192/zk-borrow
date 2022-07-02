@@ -1,7 +1,7 @@
 import { TextField, styled } from "@mui/material";
 
-const NumberField = styled(TextField)(({ theme }) => ({
-  // border: "none",
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  border: "none",
   overflow: "hidden",
   borderRadius: 4,
   "& .MuiFilledInput-input": {
@@ -18,4 +18,4 @@ const NumberField = styled(TextField)(({ theme }) => ({
   }
 }));
 
-export default NumberField;
+export default StyledTextField;
