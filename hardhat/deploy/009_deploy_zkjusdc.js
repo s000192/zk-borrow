@@ -1,14 +1,15 @@
 const { BigNumber } = require("ethers");
 
-const USDC = new Map();
-USDC.set("4", "0x4dbcdf9b62e891a7cec5a2568c3f4faf9e8abe2b");
-USDC.set("1337", "0x4dbcdf9b62e891a7cec5a2568c3f4faf9e8abe2b");
-USDC.set("1666700000", "0x289590A672C3Eb0AE9c952dBbf00E489f3F0B7b1"); // https://testnet.bridge.hmny.io/tokens
+// const USDC = new Map();
+// USDC.set("4", "0x4dbcdf9b62e891a7cec5a2568c3f4faf9e8abe2b");
+// USDC.set("1337", "0x4dbcdf9b62e891a7cec5a2568c3f4faf9e8abe2b");
+// USDC.set("1666700000", "0x289590A672C3Eb0AE9c952dBbf00E489f3F0B7b1"); // https://testnet.bridge.hmny.io/tokens
 
-const USDC_PRICE_FEED = new Map();
-USDC_PRICE_FEED.set("4", "0xa24de01df22b63d23Ebc1882a5E3d4ec0d907bFB");
-USDC_PRICE_FEED.set("1337", "0xa24de01df22b63d23Ebc1882a5E3d4ec0d907bFB");
-USDC_PRICE_FEED.set("1666700000", "0xa0ABAcC3162430b67Aa6C135dfAA08E117A38bF0"); // https://docs.chain.link/docs/harmony-price-feeds/
+// const USDC_PRICE_FEED = new Map();
+// USDC_PRICE_FEED.set("4", "0xa24de01df22b63d23Ebc1882a5E3d4ec0d907bFB");
+// USDC_PRICE_FEED.set("1337", "0xa24de01df22b63d23Ebc1882a5E3d4ec0d907bFB");
+// USDC_PRICE_FEED.set("1666700000", "0xa0ABAcC3162430b67Aa6C135dfAA08E117A38bF0"); // https://docs.chain.link/docs/harmony-price-feeds/
+// USDC_PRICE_FEED.set("1666600000", "0xA45A41be2D8419B60A6CE2Bc393A0B086b8B3bda")
 
 module.exports = async function ({
   getChainId,
@@ -36,26 +37,26 @@ module.exports = async function ({
   const verifier = await ethers.getContract("Verifier");
   const merkleTreeWithHistory = await ethers.getContract("MerkleTreeWithHistory");
 
-  let usdcAddress = USDC.get(chainId);
+  // let usdcAddress = USDC.get(chainId);
 
   // TODO: Adding this temporarily for testing.
-  if (chainId === '1337' || chainId === '1666900000') {
-    const usdcDeployment = await deploy("USDC", {
-      from: deployer,
-      args: [
-        "USD Coin",
-        "USDC",
-        6
-      ],
-      log: true,
-      deterministicDeployment: false,
-      contract: "ERC20",
-    });
-    usdcAddress = usdcDeployment.address;
+  // if (chainId === '1337' || chainId === '1666900000') {
+  const usdcDeployment = await deploy("USDC", {
+    from: deployer,
+    args: [
+      "USD Coin",
+      "USDC",
+      6
+    ],
+    log: true,
+    deterministicDeployment: false,
+    contract: "ERC20",
+  });
+  const usdcAddress = usdcDeployment.address;
 
-    const usdc = await ethers.getContract("USDC");
-    await usdc.mint(deployer, ethers.utils.parseUnits("100000", 6));
-  }
+  const usdc = await ethers.getContract("USDC");
+  await usdc.mint(deployer, ethers.utils.parseUnits("100000", 6));
+  // }
 
   const deployment = await deploy("JUsdcDelegator", {
     from: deployer,
@@ -91,21 +92,21 @@ module.exports = async function ({
   });
 
   // TODO: Adding this temporarily for testing.
-  if (chainId === '1337' || chainId === '1666900000') {
-    const priceOracle = await ethers.getContract("MockOracle");
-    console.log("Setting price feed source for zkjUSDC");
-    await priceOracle._setUnderlyingPrice(
-      jUsdcDelegator.address,
-      BigNumber.from("100079980")
-    );
-  } else {
-    const priceOracle = await ethers.getContract("PriceOracleProxyUSD");
-    console.log("Setting price feed source for zkjUSDC");
-    await priceOracle._setAggregators(
-      [jUsdcDelegator.address],
-      [USDC_PRICE_FEED.get(chainId)]
-    );
-  }
+  // if (chainId === '1337' || chainId === '1666900000') {
+  const priceOracle = await ethers.getContract("MockOracle");
+  console.log("Setting price feed source for zkjUSDC");
+  await priceOracle._setUnderlyingPrice(
+    jUsdcDelegator.address,
+    BigNumber.from("100079980")
+  );
+  // } else {
+  // const priceOracle = await ethers.getContract("PriceOracleProxyUSD");
+  // console.log("Setting price feed source for zkjUSDC");
+  // await priceOracle._setAggregators(
+  //   [jUsdcDelegator.address],
+  //   [USDC_PRICE_FEED.get(chainId)]
+  // );
+  // }
 
   const collateralFactor = "0.80";
   console.log("Setting collateral factor ", collateralFactor);
