@@ -49,7 +49,6 @@ const Supply: NextPage = () => {
       // TODO: use multicall
       const _balance = await market.balanceOf(address);
       const _decimals = await market.decimals();
-      console.log(_decimals)
 
       setSuppliedBalance(Number(formatUnits(_balance.toString(), _decimals)));
     } catch (e) {
@@ -64,7 +63,6 @@ const Supply: NextPage = () => {
       provider,
       address
     );
-    console.log(details);
     setMarketDetails(details);
   }, [address, marketAddress, provider])
 
@@ -98,7 +96,6 @@ const Supply: NextPage = () => {
         provider,
         address
       );
-      console.log(details);
       setMarketDetails(details);
     })();
   }, [provider, address, marketAddress]);

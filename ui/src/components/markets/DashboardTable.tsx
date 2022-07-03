@@ -126,7 +126,7 @@ const DashboardTable = ({ side }: { side: Side }) => {
       const markets = await Promise.all(
         marketAddresses.map(async (marketAddress: string) => {
           const details = await getMarketDetails(marketAddress, provider, address);
-          console.log(details)
+          // console.log(details)
           if (!details) return;
           const { symbol, supplyApy, borrowApy, balance, supplied, borrowed, liquidity } = details;
 

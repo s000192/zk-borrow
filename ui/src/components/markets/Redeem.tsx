@@ -26,7 +26,6 @@ const Redeem = ({
     try {
 
       const amount = parseUnits(suppliedBalance.toString(), 8);
-      console.log(amount.toString());
       const redeemTx = await market.redeem(amount);
       const receipt = await redeemTx.wait();
       await refreshSuppliedBalance();

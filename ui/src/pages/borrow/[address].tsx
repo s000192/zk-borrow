@@ -47,7 +47,6 @@ const Supply: NextPage = () => {
       provider,
       address
     );
-    console.log(details);
     setMarketDetails(details);
   }, [address, marketAddress, provider])
 
