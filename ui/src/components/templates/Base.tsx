@@ -1,6 +1,5 @@
 import React from "react";
 import AppBar from "../navigation/AppBar";
-import Menu from "../navigation/Menu";
 import { Box, styled } from "@mui/material";
 import { keyframes } from "@mui/styled-engine";
 
@@ -61,9 +60,6 @@ const Base: React.FC = ({ children }) => {
     <BaseBox>
       <Box px={{ xs: 2, sm: 4 }} pt={{ xs: 2, sm: 4 }} zIndex={contentZIndex}>
         <AppBar />
-        <Box mt={2}>
-          <Menu />
-        </Box>
       </Box>
 
       <Box

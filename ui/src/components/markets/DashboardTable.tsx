@@ -8,6 +8,7 @@ import addresses from "../../contracts/addresses.json";
 import { ChainId } from '../../data/types';
 import { percentFormatter } from '../../utils/formatter/percentFormatter';
 import getMarketDetails from '../../contracts/getMarketDetails';
+import NextLink from 'next/link';
 
 interface Column {
   id: 'asset' | 'apy' | 'balance' | 'liquidity';
@@ -76,17 +77,7 @@ interface Data {
   supplied: number;
   borrowed: number;
   liquidity: number;
-}
-
-function createData(
-  asset: string,
-  apy: number,
-  balance: number,
-  supplied: number,
-  borrowed: number,
-  liquidity: number,
-): Data {
-  return { asset, apy, balance, supplied, borrowed, liquidity };
+  address: string;
 }
 
 const StyledTableCell = styled(TableCell)<MuiTableCellProps>(({ theme }) => ({
@@ -132,7 +123,6 @@ const DashboardTable = ({ side }: { side: Side }) => {
 
     (async () => {
       const marketAddresses = await comptroller.getAllMarkets();
-      console.log(marketAddresses);
       const markets = await Promise.all(
         marketAddresses.map(async (marketAddress: string) => {
           const details = await getMarketDetails(marketAddress, provider, address);
@@ -147,7 +137,7 @@ const DashboardTable = ({ side }: { side: Side }) => {
             apy = borrowApy;
           }
 
-          return createData(symbol, apy, balance, supplied, borrowed, liquidity);
+          return { asset: symbol, apy, balance, supplied, borrowed, liquidity, address: marketAddress };
         })
       );
       setMarkets(markets);
@@ -183,18 +173,20 @@ const DashboardTable = ({ side }: { side: Side }) => {
           <TableBody>
             {markets.map((market) => {
               return (
-                <TableRow hover role="checkbox" tabIndex={-1} key={market.asset}>
-                  {columns.map((column) => {
-                    const value = market[column.id];
-                    return (
-                      <StyledTableCell key={column.id} align={column.align}>
-                        {column.format && typeof value === 'number'
-                          ? column.format(value)
-                          : value}
-                      </StyledTableCell>
-                    );
-                  })}
-                </TableRow>
+                <NextLink key={market.asset} href={`/${side}/${market.address}`}>
+                  <TableRow hover role="checkbox" tabIndex={-1}>
+                    {columns.map((column) => {
+                      const value = market[column.id];
+                      return (
+                        <StyledTableCell key={column.id} align={column.align}>
+                          {column.format && typeof value === 'number'
+                            ? column.format(value)
+                            : value}
+                        </StyledTableCell>
+                      );
+                    })}
+                  </TableRow>
+                </NextLink>
               );
             })}
           </TableBody >
