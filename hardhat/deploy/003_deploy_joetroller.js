@@ -43,11 +43,11 @@ module.exports = async function ({
   );
 
   let priceOracle;
-  if (chainId === '1337' || chainId === '1666900000') {
-    priceOracle = await ethers.getContract("MockOracle");
-  } else {
-    priceOracle = await ethers.getContract("PriceOracleProxyUSD");
-  }
+  // if (chainId === '1337' || chainId === '1666900000') {
+  priceOracle = await ethers.getContract("MockOracle");
+  // } else {
+  //   priceOracle = await ethers.getContract("PriceOracleProxyUSD");
+  // }
   console.log("Setting price oracle ", priceOracle.address);
   await joetroller._setPriceOracle(priceOracle.address);
 
