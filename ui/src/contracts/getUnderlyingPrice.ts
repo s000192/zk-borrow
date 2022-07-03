@@ -2,6 +2,7 @@ import { Contract, providers, utils } from "ethers";
 import comptrollerAbi from "../abis/comptroller.json";
 import oracleAbi from "../abis/oracle.json";
 import addresses from "../contracts/addresses.json";
+import { ChainId } from '../data/types';
 
 const getUnderlyingPrice = async (
   provider: providers.Web3Provider,
@@ -10,7 +11,7 @@ const getUnderlyingPrice = async (
 ): Promise<string> => {
   const network = await provider.getNetwork();
   const comptroller = new Contract(
-    addresses.unitroller[network.chainId.toString()],
+    addresses.unitroller[network.chainId.toString() as ChainId],
     comptrollerAbi,
     provider
   );
