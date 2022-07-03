@@ -6,7 +6,7 @@ import InfoBox from "../../components/shared/InfoBox";
 import "../../i18n";
 import Button from "../../components/shared/Button";
 import { useCallback, useEffect, useState } from "react";
-import { Contract, constants } from "ethers";
+import { Contract } from "ethers";
 import { useConnect } from "../../contexts/ConnectContext";
 import zkjTokenAbi from "../../abis/zkjToken.json";
 import erc20TokenAbi from "../../abis/erc20.json";

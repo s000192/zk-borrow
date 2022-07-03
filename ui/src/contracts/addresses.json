@@ -1,8 +1,11 @@
 {
   "unitroller": {
-    "1313161554": "",
-    "4": "",
-    "31337": "0x897A8C523018CecC2Ec4A9aBe5cBecb379f86c4a",
     "1337": "0xAee9eaDc5bb62FA4d48adCaD2ebF6F51f4d036C4"
+  },
+  "weth": {
+    "1337": "0x1A2708Fdd434CB568AFeD06A6fC9046Ca7b01B9F"
+  },
+  "usdc": {
+    "1337": "0xBEfADEb30AD5503165cbb20C5B3bd02A07124342"
   }
 }

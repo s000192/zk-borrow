@@ -2,7 +2,7 @@ export type User = {
   address: string;
 };
 
-export type ChainId = "1313161554" | "4" | "1337"
+export type ChainId = "1337"
 
 export type MarketDetails = {
   underlyingTokenAddress: string;

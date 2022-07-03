@@ -5,9 +5,16 @@ import NextLink from 'next/link';
 const AppBar = () => {
   return (
     <Box display="flex">
-      <NextLink href="/">
-        HOME
-      </NextLink>
+      <Box flex={1}>
+        <NextLink href="/">
+          HOME
+        </NextLink>
+      </Box>
+      <Box flex={1}>
+        <NextLink href="/mint">
+          MINT TEST TOKENS
+        </NextLink>
+      </Box>
       <Box flex={1} />
       <Box>
         <ConnectWallet />
