@@ -12,20 +12,20 @@ import "../i18n";
 
 const Mint: NextPage = () => {
   const { signer, address, chainId } = useConnect();
-  const [weth, setWeth] = useState<Contract>();
+  // const [weth, setWeth] = useState<Contract>();
   const [usdc, setUsdc] = useState<Contract>();
 
-  useEffect(() => {
-    if (weth || !signer || !chainId) return;
+  // useEffect(() => {
+  //   if (weth || !signer || !chainId) return;
 
-    setWeth(
-      new Contract(
-        addresses.weth[chainId.toString() as ChainId],
-        erc20Abi,
-        signer
-      )
-    );
-  }, [signer, chainId, weth]);
+  //   setWeth(
+  //     new Contract(
+  //       addresses.weth[chainId.toString() as ChainId],
+  //       erc20Abi,
+  //       signer
+  //     )
+  //   );
+  // }, [signer, chainId, weth]);
 
   useEffect(() => {
     if (usdc || !signer || !chainId) return;
@@ -39,15 +39,15 @@ const Mint: NextPage = () => {
     );
   }, [signer, chainId, usdc]);
 
-  const handleMintWethButtonClick = async () => {
-    if (!weth) return
+  // const handleMintWethButtonClick = async () => {
+  //   if (!weth) return
 
-    try {
-      await weth.mint(address, parseEther("100"))
-    } catch (e) {
-      console.log(e)
-    }
-  }
+  //   try {
+  //     await weth.mint(address, parseEther("100"))
+  //   } catch (e) {
+  //     console.log(e)
+  //   }
+  // }
 
   const handleMintUsdcButtonClick = async () => {
     if (!usdc) return
@@ -61,7 +61,7 @@ const Mint: NextPage = () => {
 
   return (
     <>
-      <Button onClick={handleMintWethButtonClick}>Mint test WETH</Button>
+      {/* <Button onClick={handleMintWethButtonClick}>Mint test WETH</Button> */}
       <Button onClick={handleMintUsdcButtonClick}>Mint test USDC</Button>
     </>
   )

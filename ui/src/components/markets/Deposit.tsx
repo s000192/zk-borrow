@@ -148,6 +148,7 @@ const Deposit = ({
         </Button>
       </Grid>
 
+      <InfoBox>{statusMessage}</InfoBox>
       <InfoBox>{depositNote}</InfoBox>
     </>
   );

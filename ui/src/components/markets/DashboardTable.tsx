@@ -123,7 +123,7 @@ const DashboardTable = ({ side }: { side: Side }) => {
 
     (async () => {
       const marketAddresses = await comptroller.getAllMarkets();
-      const markets = await Promise.all(
+      const markets = (await Promise.all(
         marketAddresses.map(async (marketAddress: string) => {
           const details = await getMarketDetails(marketAddress, provider, address);
           // console.log(details)
@@ -139,7 +139,8 @@ const DashboardTable = ({ side }: { side: Side }) => {
 
           return { asset: symbol, apy, balance, supplied, borrowed, liquidity, address: marketAddress };
         })
-      );
+      )).filter(market => market.asset !== "WETH"); // Temporary disable WETH market
+      console.log(markets)
       setMarkets(markets);
     })();
   }, [comptroller, provider, address, side]);

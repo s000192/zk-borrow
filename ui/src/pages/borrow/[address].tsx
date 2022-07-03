@@ -93,10 +93,13 @@ const Supply: NextPage = () => {
 
             <Borrow
               action={tab}
+              userAddress={address}
               balance={marketDetails.balance}
               borrowed={marketDetails.borrowed}
+              underlying={underlying}
               underlyingSymbol={marketDetails.symbol}
               market={market}
+              marketAddress={marketAddress as string}
               decimals={marketDetails.decimals}
               refreshMarketDetails={refreshMarketDetails}
             />
