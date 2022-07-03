@@ -140,7 +140,6 @@ const DashboardTable = ({ side }: { side: Side }) => {
           return { asset: symbol, apy, balance, supplied, borrowed, liquidity, address: marketAddress };
         })
       )).filter(market => market.asset !== "WETH"); // Temporary disable WETH market
-      console.log(markets)
       setMarkets(markets);
     })();
   }, [comptroller, provider, address, side]);
