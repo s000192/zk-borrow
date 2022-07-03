@@ -1,22 +1,36 @@
-Harmony Devnet Deployment
-MockOracle: 0x36F67596B9DC38B294347e016Ed06b1208D80B38
-RewardDistributor: 0xb2eC23F3edF795494a44Ffae3493516FDa59aC03
-MajorInterestRateModel: 0x21c7FbC2c91e4d5d381747cf46771868F299966f
-StableInterestRateModel: 0x63774D37C8e5EC258E1C6975bE9CcbEd70ff5A73
-GovernanceInterestRateModel: 0xD95bA9BB401B71D5212EA08E83d004D8E0Cb4B2c
-Unitroller: 0x1A2708Fdd434CB568AFeD06A6fC9046Ca7b01B9F
-Joetroller: 0x00215ae65638b63bFd4949639EB01184B179e6d3
-Hasher: 0xb6AB2B307227cB192895Dd4E71f9f4b98D289C8b
-MerkleTreeWithHistory: 0xD700980cBa683dcea18FBF9CeD9dcCb7587f7b8C
-Verifier: 0xf5256Dec28845905182a7529f2bf836486DA2050
-JAvaxDelegate: 0xBEfADEb30AD5503165cbb20C5B3bd02A07124342
-WETH: 0xB3be43Ff073C3d163f484CC241114B7f173C9d6c
-JAvaxDelegator: 0x3F87AD9e52b660fE32172c74f5D2610F3f84Ee31
-JUsdcDelegate: 0x84Bb2F6EFd56C387Aa5A6010494Cbb1dCa1eb727
-USDC: 0x9fd42044fc32CD32cD1baE24608d12aE35e57A03
-JUsdcDelegator: 0xD7ac95d62096Bd27742Fd08d0763f2fEBA16B141
-JoeLens: 0x0b94a0b9a1E0E5E8AF49E2d0F943eeE28DAbB7D7
+# zkJoe
 
+zkJoe is a fork of trader joe with privacy enabled (inspired by Tornado Cash).
+
+## Run Locally
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/s000192/zkJoe.git
+```
+
+### Run circuits and contracts
+
+To run cicuits and contracts, go inside the `hardhat` folder:
+
+```bash
+cd hardhat
+```
+
+Then, follow the intructions in the [README file](/hardhat/README.md) in the `hardhat` folder.
+
+### Run zksudoku-ui
+
+To run the frontend, go inside the `zksudoku-ui` folder:
+
+```bash
+cd ui
+```
+
+Then, follow the intructions in the [README file](/ui/README.md) in the `ui` folder.
+
+```
 Harmony Mainnet Deployment
 MockOracle: 0x591C7f6E4f6493a72ED8D60795B0e16C341883cC
 RewardDistributor: 0x73a9CA14Fb80769D2dc5837db9ff5472a541574D
@@ -31,3 +45,4 @@ Verifier: 0x36F67596B9DC38B294347e016Ed06b1208D80B38
 USDC: 0x6FDde7C2A8093a2c0Ef7600bA299CEcEcB8730e8
 JUsdcDelegator: 0xC0A67dF7B207d6ebF769C51807982adaf9B9684B
 JoeLens: 0xb7418f84F3ad1CA28ED6489eF9E3dA142FA1c3D4
+```
