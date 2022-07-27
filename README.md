@@ -2,6 +2,11 @@
 
 zkJoe is a fork of trader joe with privacy enabled (inspired by Tornado Cash).
 
+## 👨‍🔧🛠
+<p align="center">
+  <img width='600' src="./diagram/zkjoe.png">
+</p>
+
 ## Demo Link 🔗
 https://zk-joe.vercel.app/
 
